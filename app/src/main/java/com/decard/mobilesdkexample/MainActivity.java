@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.card_opera_btn:
                 if (devHandle > 0) {
-                    startActivity(new Intent(MainActivity.this, CardOperaActivity.class));
+                    startActivity(new Intent(MainActivity.this, IdInformation.class));
                     Log.d(TAG, "card_opera_btn onClick: ");
                 } else Toast.makeText(this, "请先打开端口。", Toast.LENGTH_SHORT).show();
                 break;

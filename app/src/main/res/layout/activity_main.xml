@@ -16,14 +16,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/open_btn"
-                android:text="@string/Open_btn_str"
+                android:text="连接设备"
                 android:textSize="22dp"/>
 
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/card_opera_btn"
-                android:text="@string/Card_opera_str"
+                android:text="读取信息"
                 android:textSize="22dp"/>
 
             <Button
@@ -37,7 +37,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/close_btn"
-                android:text="@string/Close_btn_str"
+                android:text="断开设备"
                 android:textSize="22dp"/>
 
         </LinearLayout>

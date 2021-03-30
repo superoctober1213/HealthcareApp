@@ -11,7 +11,7 @@ public class Choose extends AppCompatActivity {
 
     private Button Deka;
     private Button Baolaite;
-    @Override
+     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.choose);
