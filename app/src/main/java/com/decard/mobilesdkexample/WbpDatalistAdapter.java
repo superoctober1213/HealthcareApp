@@ -11,10 +11,6 @@ import com.example.bluetoothlibrary.entity.SycnBp;
 
 import java.util.ArrayList;
 
-/**
- * Created by laiyiwen on 2017/5/19.
- */
-
 public class WbpDatalistAdapter extends BaseAdapter {
     private ArrayList<SycnBp> mLeDevices;
     private LayoutInflater mInflator;

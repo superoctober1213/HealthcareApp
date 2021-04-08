@@ -17,10 +17,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 
-/**
- * Created by badcode on 15/10/10.
- * Surface View
- */
 public class SPO2WaveView extends SurfaceView implements SurfaceHolder.Callback {
 
     private final static float TOTLE_POINTS = 300.0f;

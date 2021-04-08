@@ -9,17 +9,17 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class Choose extends AppCompatActivity {
 
-    private Button Deka;
-    private Button Baolaite;
-     @Override
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.choose);
 
-        Deka = findViewById(R.id.deka);
-        Baolaite = findViewById(R.id.baolaite);
+         Button deka = findViewById(R.id.deka);
+         Button baolaite = findViewById(R.id.baolaite);
+         Button register = findViewById(R.id.register);
 
-        Deka.setOnClickListener(new View.OnClickListener() {
+        deka.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent();
@@ -28,7 +28,7 @@ public class Choose extends AppCompatActivity {
             }
         });
 
-        Baolaite.setOnClickListener(new View.OnClickListener() {
+        baolaite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent();
@@ -36,8 +36,15 @@ public class Choose extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        register.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent();
+                intent.setClass(Choose.this, com.decard.mobilesdkexample.LoginRegister.loginActivity.class);
+                startActivity(intent);
+            }
+        });
     }
-
-
 
 }

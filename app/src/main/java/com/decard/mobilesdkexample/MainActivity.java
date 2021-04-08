@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import com.decard.NDKMethod.BasicOper;
 import com.decard.dc_readsn.DcDeviceUtil;
+import com.decard.mobilesdkexample.ReadHistory.Activity1;
 import com.decard.mobilesdkexample.ToolUtils.Constant;
 import com.decard.mobilesdkexample.UI.CardOperaActivity;
 import com.decard.mobilesdkexample.OperaUtils.PortUtil;
@@ -42,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.card_opera_btn).setOnClickListener(this);
         findViewById(R.id.device_opera_btn).setOnClickListener(this);
         findViewById(R.id.close_btn).setOnClickListener(this);
+        findViewById(R.id.read_his_btn).setOnClickListener(this);
     }
 
     public void onClick(View view) {
@@ -55,6 +57,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     startActivity(new Intent(MainActivity.this, IdInformation.class));
                     Log.d(TAG, "card_opera_btn onClick: ");
                 } else Toast.makeText(this, "请先打开端口。", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.read_his_btn:
+                startActivity(new Intent(MainActivity.this, Activity1.class));
                 break;
             case R.id.device_opera_btn:
                 startActivity(new Intent(MainActivity.this, DevicesOperaActivity.class));

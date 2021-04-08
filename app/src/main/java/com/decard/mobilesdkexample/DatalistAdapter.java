@@ -11,16 +11,10 @@ import com.example.bluetoothlibrary.entity.SycnData;
 
 import java.util.ArrayList;
 
-/**
- * Created by laiyiwen on 2017/5/12.
- */
-
 public class DatalistAdapter extends BaseAdapter {
     private ArrayList<SycnData> mLeDevices;
     private LayoutInflater mInflator;
     private Activity mContext;
-
-
 
     public DatalistAdapter(Activity c , ArrayList<SycnData> showDevice) {
         super();
