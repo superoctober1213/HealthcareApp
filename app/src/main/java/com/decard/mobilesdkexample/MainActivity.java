@@ -1,23 +1,18 @@
 package com.decard.mobilesdkexample;
 
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
-
-import com.decard.NDKMethod.BasicOper;
 import com.decard.dc_readsn.DcDeviceUtil;
 import com.decard.mobilesdkexample.ReadHistory.Activity1;
 import com.decard.mobilesdkexample.ToolUtils.Constant;
-import com.decard.mobilesdkexample.UI.CardOperaActivity;
 import com.decard.mobilesdkexample.OperaUtils.PortUtil;
 import com.decard.mobilesdkexample.UI.DevicesOperaActivity;
 import com.decard.mobilesdkexample.UI.OpenPortActivity;
-import com.decard.mobilesdkexample.UI.T10EM2Activity;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 

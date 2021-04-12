@@ -11,6 +11,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -25,8 +26,8 @@ import java.util.ArrayList;
 
 public class loginActivity extends AppCompatActivity implements View.OnClickListener {
     /**
-     * 声明自己写的 DBOpenHelper 对象
-     * DBOpenHelper(extends SQLiteOpenHelper) 主要用来
+     * 声明自己写的 DBReadHelper 对象
+     * DBReadHelper(extends SQLiteOpenHelper) 主要用来
      * 创建数据表
      * 然后再进行数据表的增、删、改、查操作
      */
@@ -37,6 +38,7 @@ public class loginActivity extends AppCompatActivity implements View.OnClickList
     private EditText mEtLoginactivityPassword;
     private LinearLayout mLlLoginactivityTwo;
     private Button mBtLoginactivityLogin;
+    private ImageView mIvLoginActivityBack;
 
     /**
      * 创建 Activity 时先来重写 onCreate() 方法
@@ -46,8 +48,8 @@ public class loginActivity extends AppCompatActivity implements View.OnClickList
      * setContentView(R.layout.activity_login);
      * 上面这行代码真正实现了把视图层 View 也就是 layout 的内容放到 Activity 中进行显示
      * 初始化视图中的控件对象 initView()
-     * 实例化 DBOpenHelper，待会进行登录验证的时候要用来进行数据查询
-     * mDBOpenHelper = new DBOpenHelper(this);
+     * 实例化 DBReadHelper，待会进行登录验证的时候要用来进行数据查询
+     * mDBOpenHelper = new DBReadHelper(this);
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,14 +74,21 @@ public class loginActivity extends AppCompatActivity implements View.OnClickList
         mEtLoginactivityUsername = findViewById(R.id.et_loginactivity_username);
         mEtLoginactivityPassword = findViewById(R.id.et_loginactivity_password);
         mLlLoginactivityTwo = findViewById(R.id.ll_loginactivity_two);
+        mIvLoginActivityBack = findViewById(R.id.iv_loginactivity_back);
 
         // 设置点击事件监听器
         mBtLoginactivityLogin.setOnClickListener(this);
         mTvLoginactivityRegister.setOnClickListener(this);
+        mIvLoginActivityBack.setOnClickListener(this);
     }
 
     public void onClick(View view) {
         switch (view.getId()) {
+            case R.id.iv_loginactivity_back:
+                Intent intent1 = new Intent(this, Choose.class);
+                startActivity(intent1);
+                finish();
+                break;
             // 跳转到注册界面
             case R.id.tv_loginactivity_register:
                 startActivity(new Intent(this, RegisterActivity.class));
