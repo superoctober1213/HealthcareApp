@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="communicate_progresses">
+        <item></item>
+        <item>设备连接上</item>
+        <item>扫描到服务</item>
+        <item>开启设备监听</item>
+        <item>数据通信中</item>
+        <item>连接断开</item>
+    </string-array>
+
+    <string-array name="blecommunicate_failed_messages">
+        <item>不支持的设备类型</item>
+        <item>创建通信方式失败</item>
+        <item></item>
+        <item>与设备建立连接失败</item>
+        <item>获取设备服务失败</item>
+        <item>开启设备监听失败</item>
+        <item>数据传输过程中断</item>
+        <item>连接异常断开</item>
+        <item>设备响应超时</item>
+        <item>数据异常</item>
+    </string-array>
+</resources>

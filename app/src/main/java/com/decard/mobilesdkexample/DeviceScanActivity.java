@@ -216,45 +216,7 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
 
         initHandler();
 
-        new Thread(networkTask).start();
-
     }
-
-
-    Runnable networkTask = new Runnable() {
-        @Override
-        public void run() {
-
-            String getUrl = "http://192.168.1.146/";
-           // String getUrl = "https://www.baidu.com/";
-            try{
-                //创建URL对象
-                URL url = new URL(getUrl);
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();//开启连接
-                connection.setRequestMethod("POST");
-                connection.connect();//连接服务器
-                //至此，只要地址正确，你应该就能连接到对应的接口，后台接口可以使用debug看看
-                //然后是对于请求返回的接收
-                if (connection.getResponseCode() == 200){
-                    //使用字符流形式进行回复
-                    InputStream is = connection.getInputStream();
-                    //读取信息BufferReader
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-                    StringBuffer buffer = new StringBuffer();
-                    String readLine = "";
-                    while ((readLine = reader.readLine()) != null) {
-                        buffer.append(readLine);
-                    }
-                    is.close();
-                    reader.close();
-                    connection.disconnect();
-                }
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    };
 
 
     private void getBLEPermissions() {

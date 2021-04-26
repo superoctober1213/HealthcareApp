@@ -79,14 +79,14 @@ public class DBOpenHelper extends SQLiteOpenHelper {
      * 在游的过程中把游出来的数据存放到list容器中
      * @return
      */
-    public ArrayList<com.decard.mobilesdkexample.LoginRegister.User> getAllData(){
+    public ArrayList<LoginRequest> getAllData(){
 
-        ArrayList<com.decard.mobilesdkexample.LoginRegister.User> list = new ArrayList<com.decard.mobilesdkexample.LoginRegister.User>();
+        ArrayList<LoginRequest> list = new ArrayList<LoginRequest>();
         Cursor cursor = db.query("user",null,null,null,null,null,"name DESC");
         while(cursor.moveToNext()){
             String name = cursor.getString(cursor.getColumnIndex("name"));
             String password = cursor.getString(cursor.getColumnIndex("password"));
-            list.add(new com.decard.mobilesdkexample.LoginRegister.User(name,password));
+            list.add(new LoginRequest(name,password));
         }
         return list;
     }

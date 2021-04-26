@@ -50,6 +50,7 @@
         <activity android:name=".ReadHistory.Activity1"/>
         <activity android:name=".LoginRegister.loginActivity"/>
         <activity android:name=".LoginRegister.RegisterActivity"/>
+        <activity android:name=".Temp"/>
 
     </application>
 

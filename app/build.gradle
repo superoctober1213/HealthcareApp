@@ -37,6 +37,8 @@ android {
         }
     }
 
+
+
 }
 
 dependencies {
@@ -45,6 +47,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
     implementation files('libs\\dc_mate_202101211536.jar')
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
+    implementation files('libs\\contec_htd_sdk_v1.7.jar')
     testImplementation 'junit:junit:4.13'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
@@ -55,7 +58,7 @@ dependencies {
     implementation 'com.decard.mobile:dc-licensesdk:3.2.01'
     implementation project(':bluetoothlibrary')
     compile 'jp.wasabeef:recyclerview-animators:2.2.4'
-
+    compile 'com.alibaba:fastjson:1.2.9'
 
 }
 repositories {
