@@ -13,7 +13,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#eeeeee"
-    tools:context=".LoginRegister.loginActivity">
+    tools:context=".loginActivity">
 <!--
 整体是相对布局，
 在整体上方放三个东西，这三个东西也是相对布局
@@ -51,19 +51,19 @@
         android:layout_centerVertical="true"
         android:layout_marginLeft="20dp"
         />
-    <TextView
-        android:id="@+id/tv_loginactivity_register"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="注册"
-        android:textColor="#fff"
-        android:textSize="20dp"
-        android:layout_centerVertical="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginRight="30dp"
-        android:clickable="true"
-        android:onClick="onClick"
-        />
+<!--    <TextView-->
+<!--        android:id="@+id/tv_loginactivity_register"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="注册"-->
+<!--        android:textColor="#fff"-->
+<!--        android:textSize="20dp"-->
+<!--        android:layout_centerVertical="true"-->
+<!--        android:layout_alignParentRight="true"-->
+<!--        android:layout_marginRight="30dp"-->
+<!--        android:clickable="true"-->
+<!--        android:onClick="onClick"-->
+<!--        />-->
     </RelativeLayout>
 <!--
  顶部三个东西摆放好之后
@@ -135,6 +135,13 @@
         android:gravity="center"
         android:onClick="onClick"
         />
+
+    <TextView
+        android:id="@+id/test123"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/bt_loginactivity_login"
+        android:layout_marginTop="20dp"/>
 <!--
     为了App的人性化，
     想到有以下三种无法密码登录的异常处理情况

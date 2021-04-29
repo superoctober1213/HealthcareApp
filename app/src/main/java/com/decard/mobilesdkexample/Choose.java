@@ -7,6 +7,8 @@ import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.decard.mobilesdkexample.LoginRegister.GetAccountInfoResponse;
+
 public class Choose extends AppCompatActivity {
 
 
@@ -42,7 +44,7 @@ public class Choose extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent();
-                intent.setClass(Choose.this, com.decard.mobilesdkexample.LoginRegister.loginActivity.class);
+                intent.setClass(Choose.this, com.decard.mobilesdkexample.loginActivity.class);
                 startActivity(intent);
             }
         });

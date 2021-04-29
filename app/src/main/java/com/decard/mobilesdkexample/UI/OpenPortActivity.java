@@ -76,8 +76,8 @@ public class OpenPortActivity extends AppCompatActivity implements View.OnClickL
         intent.putExtra("Handler", devHandler);
         setResult(Constant.OPEN_PORT_ACTIVITY_RESULT, intent);
         if (devHandler > 0)
-            Toast.makeText(OpenPortActivity.this, "端口打开成功：" + devHandler, Toast.LENGTH_SHORT).show();
+            Toast.makeText(OpenPortActivity.this, "连接成功：" + devHandler, Toast.LENGTH_SHORT).show();
         else
-            Toast.makeText(OpenPortActivity.this, "端口打开失败：" + devHandler, Toast.LENGTH_SHORT).show();
+            Toast.makeText(OpenPortActivity.this, "连接失败：" + devHandler, Toast.LENGTH_SHORT).show();
     }
 }
