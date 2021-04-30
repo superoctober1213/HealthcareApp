@@ -14,7 +14,6 @@ import java.util.ArrayList;
 
 public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHolder> {
     private ArrayList<IdInfo> list;
-    private OnStartDragListener onStartDragListener;
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView name;

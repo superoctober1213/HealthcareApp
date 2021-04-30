@@ -33,7 +33,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <activity android:name=".Choose">
+        <activity android:name=".loginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -48,7 +48,7 @@
         <activity android:name=".MainActivity"/>
         <activity android:name=".IdInformation"/>
         <activity android:name=".ReadHistory.Activity1"/>
-        <activity android:name=".loginActivity"/>
+        <activity android:name=".Choose"/>
         <activity android:name=".LoginRegister.RegisterActivity"/>
         <activity android:name=".Temp"/>
 

@@ -136,6 +136,7 @@ public class GetAccountInfoResponse extends BaseResponse {
 
     public void setContactTel(String contactTel) {
         ContactTel = contactTel;
+
     }
 
     public String getRecStatus() {
@@ -197,7 +198,6 @@ public class GetAccountInfoResponse extends BaseResponse {
     public void setAccountGuid(String accountGuid) {
         AccountGuid = accountGuid;
     }
-
 
 
     ///// <summary>

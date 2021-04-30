@@ -16,11 +16,15 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.decard.mobilesdkexample.LoginRegister.GetAccountInfoResponse;
 import com.decard.mobilesdkexample.LoginRegister.LoginRequest;
 import com.google.gson.Gson;
+
 import org.jetbrains.annotations.Nullable;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -38,9 +42,8 @@ public class loginActivity extends AppCompatActivity implements View.OnClickList
     private EditText mEtLoginactivityUsername;
     private EditText mEtLoginactivityPassword;
     private Button mBtLoginactivityLogin;
-    private ImageView mIvLoginActivityBack;
     private MessageHandler mHandler = new MessageHandler();
-    MyApp myApp ;
+    MyApp myApp;
     private TextView textView123;
 
     private static final int INPUT_IS_EMPTY = 0;
@@ -66,7 +69,7 @@ public class loginActivity extends AppCompatActivity implements View.OnClickList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        myApp=(MyApp) getApplication();
+        myApp = (MyApp) getApplication();
         initView();
     }
 
@@ -81,24 +84,15 @@ public class loginActivity extends AppCompatActivity implements View.OnClickList
 //        mTvLoginactivityRegister = findViewById(R.id.tv_loginactivity_register);
         mEtLoginactivityUsername = findViewById(R.id.et_loginactivity_username);
         mEtLoginactivityPassword = findViewById(R.id.et_loginactivity_password);
-        mIvLoginActivityBack = findViewById(R.id.iv_loginactivity_back);
-
         textView123 = findViewById(R.id.test123);
 
         // 设置点击事件监听器
         mBtLoginactivityLogin.setOnClickListener(this);
 //        mTvLoginactivityRegister.setOnClickListener(this);
-        mIvLoginActivityBack.setOnClickListener(this);
-
     }
 
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.iv_loginactivity_back:
-                Intent intent1 = new Intent(this, Choose.class);
-                startActivity(intent1);
-                finish();
-                break;
             // 跳转到注册界面
 //            case R.id.tv_loginactivity_register:
 //                startActivity(new Intent(this, RegisterActivity.class));
@@ -195,13 +189,14 @@ public class loginActivity extends AppCompatActivity implements View.OnClickList
                         } else {
                             inputStream = conn.getInputStream();
 
-                            }
                         }
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "GB2312"));
-                        StringBuilder response = new StringBuilder();
-                        String line;
-                        while((line= reader.readLine())!=null){
-                            response.append(line);
+                    }
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream,
+                            "GB2312"));
+                    StringBuilder response = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        response.append(line);
 
 //                        bos = new ByteArrayOutputStream();
 //                        byte[] buffer = new byte[10240];
@@ -241,7 +236,7 @@ public class loginActivity extends AppCompatActivity implements View.OnClickList
                             if (inputPswStr.equals(getAccountInfo.getAccountPwd())) {
                                 //CurrAccount = getAccountInfo;//赋值当前登录对象信息
                                 //用户名密码验证成功！进入登录后界面
-                                 myApp.currAccount  = getAccountInfo;
+                                myApp.currAccount = getAccountInfo;
                                 mHandler.sendEmptyMessage(REQUST_SUCCESS);
 
                             } else {
@@ -324,7 +319,6 @@ public class loginActivity extends AppCompatActivity implements View.OnClickList
                     Intent intent = new Intent(loginActivity.this, Choose.class);
                     startActivity(intent);
                     finish();
-//                    textView123.setText(myApp.currAccount.toString());
                     break;
                 case REQUST_FAIL:
                     mEtLoginactivityUsername.setText("");

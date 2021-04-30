@@ -12,6 +12,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -19,8 +20,23 @@
             android:orientation="vertical">
 
             <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="10dp">
+
+                <EditText
+                    android:id="@+id/editNum"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/edittext1"
+                    android:textSize="28sp"
+                    android:hint="患者手机号码"/>
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:layout_marginTop="60dp"
                 android:layout_weight="1">
 
                 <TextView
@@ -115,8 +131,8 @@
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_marginTop="60dp"
                 android:layout_gravity="center_horizontal"
+                android:layout_marginTop="60dp"
                 android:layout_weight="1">
 
                 <Button
@@ -125,7 +141,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20sp"
                     android:text="开始读取"
-                    android:textSize="28sp" />
+                    android:textSize="28sp"
+                    android:onClick="onClick"/>
             </LinearLayout>
 
         </LinearLayout>

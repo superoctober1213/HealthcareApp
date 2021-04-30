@@ -32,7 +32,3 @@ public class Activity1 extends AppCompatActivity {
 
     }
 }
-
-interface OnStartDragListener{
-    void startDrag(RecyclerView.ViewHolder holder);
-}
