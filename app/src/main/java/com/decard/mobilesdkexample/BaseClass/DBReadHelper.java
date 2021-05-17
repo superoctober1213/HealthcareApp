@@ -1,4 +1,4 @@
-package com.decard.mobilesdkexample.ReadHistory;
+package com.decard.mobilesdkexample.BaseClass;
 
 import android.content.Context;
 import android.database.Cursor;

@@ -1,6 +1,4 @@
-package com.decard.mobilesdkexample.LoginRegister;
-
-import com.decard.mobilesdkexample.BaseResponse;
+package com.decard.mobilesdkexample.BaseClass;
 
 public class GetAccountInfoResponse extends BaseResponse {
     /// <summary>

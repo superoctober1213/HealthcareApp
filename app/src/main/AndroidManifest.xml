@@ -47,10 +47,12 @@
         <activity android:name=".DeviceScanActivity"/>
         <activity android:name=".MainActivity"/>
         <activity android:name=".IdInformation"/>
-        <activity android:name=".ReadHistory.Activity1"/>
+        <activity android:name=".RHistoryActivity"/>
         <activity android:name=".Choose"/>
-        <activity android:name=".LoginRegister.RegisterActivity"/>
         <activity android:name=".Temp"/>
+        <activity android:name=".HelpClass.CustomerHelp"/>
+        <activity android:name=".CustomerTel"/>
+        <activity android:name=".CurrCustomerInfo"/>
 
     </application>
 

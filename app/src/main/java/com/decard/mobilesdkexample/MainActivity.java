@@ -7,8 +7,9 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
+
+import com.decard.NDKMethod.BasicOper;
 import com.decard.dc_readsn.DcDeviceUtil;
-import com.decard.mobilesdkexample.ReadHistory.Activity1;
 import com.decard.mobilesdkexample.ToolUtils.Constant;
 import com.decard.mobilesdkexample.OperaUtils.PortUtil;
 import com.decard.mobilesdkexample.UI.DevicesOperaActivity;
@@ -26,12 +27,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         String androidId = Settings.Secure.getString(getContentResolver(),Settings.Secure.ANDROID_ID);
         DcDeviceUtil.setAndroidId(androidId);
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                BasicOper.dc_init(getApplicationContext(),"此处填入授权ID");
-//            }
-//        }).start();
+        BasicOper.dc_open("BT", this, "DC:0D:30:B9:7D:F7", 0);
 
         findViewById(R.id.open_btn).setOnClickListener(this);
         findViewById(R.id.card_opera_btn).setOnClickListener(this);
@@ -53,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 } else Toast.makeText(this, "请先打开端口。", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.read_his_btn:
-                startActivity(new Intent(MainActivity.this, Activity1.class));
+                startActivity(new Intent(MainActivity.this, RHistoryActivity.class));
                 break;
             case R.id.device_opera_btn:
                 startActivity(new Intent(MainActivity.this, DevicesOperaActivity.class));

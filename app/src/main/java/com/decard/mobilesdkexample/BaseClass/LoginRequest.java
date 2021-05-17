@@ -1,11 +1,4 @@
-package com.decard.mobilesdkexample.LoginRegister;
-
-import android.provider.ContactsContract;
-
-import com.alibaba.fastjson.JSON;
-import com.decard.mobilesdkexample.BaseRequest;
-import com.alibaba.fastjson.JSONObject;
-
+package com.decard.mobilesdkexample.BaseClass;
 
 public class LoginRequest extends BaseRequest {
     private String accountNo;            //用户名

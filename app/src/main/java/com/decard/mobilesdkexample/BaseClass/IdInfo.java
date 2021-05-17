@@ -1,4 +1,4 @@
-package com.decard.mobilesdkexample.ReadHistory;
+package com.decard.mobilesdkexample.BaseClass;
 
 public class IdInfo {
 

@@ -1,4 +1,4 @@
-package com.decard.mobilesdkexample.ReadHistory;
+package com.decard.mobilesdkexample.HelpClass;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +8,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.decard.mobilesdkexample.BaseClass.IdInfo;
 import com.decard.mobilesdkexample.R;
 
 import java.util.ArrayList;

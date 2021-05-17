@@ -1,15 +1,11 @@
-package com.decard.mobilesdkexample.ReadHistory;
+package com.decard.mobilesdkexample.BaseClass;
 
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
-import android.text.SpannableString;
-import android.text.Spanned;
-import android.text.SpannedString;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.method.DigitsKeyListener;
-import android.text.style.AbsoluteSizeSpan;
 import android.widget.EditText;
 
 import java.util.regex.Matcher;

@@ -7,8 +7,6 @@ import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.decard.mobilesdkexample.LoginRegister.GetAccountInfoResponse;
-
 public class Choose extends AppCompatActivity {
 
 
@@ -19,14 +17,13 @@ public class Choose extends AppCompatActivity {
 
          Button deka = findViewById(R.id.deka);
          Button baolaite = findViewById(R.id.baolaite);
-         Button register = findViewById(R.id.register);
          Button temp = findViewById(R.id.temp);
 
         deka.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent();
-                intent.setClass(Choose.this, MainActivity.class);
+                intent.setClass(Choose.this, CurrCustomerInfo.class);
                 startActivity(intent);
             }
         });
@@ -40,14 +37,6 @@ public class Choose extends AppCompatActivity {
             }
         });
 
-        register.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent();
-                intent.setClass(Choose.this, com.decard.mobilesdkexample.loginActivity.class);
-                startActivity(intent);
-            }
-        });
 
         temp.setOnClickListener(new View.OnClickListener() {
             @Override

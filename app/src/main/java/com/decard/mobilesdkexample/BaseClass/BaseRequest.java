@@ -1,4 +1,4 @@
-package com.decard.mobilesdkexample;
+package com.decard.mobilesdkexample.BaseClass;
 
 import java.util.UUID;
 

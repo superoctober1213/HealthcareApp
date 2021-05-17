@@ -1,6 +1,4 @@
-package com.decard.mobilesdkexample.ReadHistory;
-
-import com.decard.mobilesdkexample.BaseRequest;
+package com.decard.mobilesdkexample.BaseClass;
 
 public class GetCustomerInfoRequest extends BaseRequest {
 

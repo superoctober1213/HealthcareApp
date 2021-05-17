@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <ScrollView
-        android:layout_width="411dp"
-        android:layout_height="730dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:fadeScrollbars="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -15,121 +15,134 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
             android:orientation="vertical">
 
             <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginTop="60dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
                 android:layout_weight="1">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="姓名："
-                    android:textSize="28sp" />
+                    android:textColor="#C0C0C0"
+                    android:textSize="20sp" />
 
                 <TextView
-                    android:id="@+id/IName"
+                    android:id="@+id/CName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="28sp" />
+                    android:textSize="20sp" />
             </LinearLayout>
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:background="#66CCFF" />
+
             <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginTop="60dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
                 android:layout_weight="1">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="性别："
-                    android:textSize="28sp" />
+                    android:textColor="#C0C0C0"
+                    android:textSize="20sp" />
 
                 <TextView
-                    android:id="@+id/IGender"
+                    android:id="@+id/CGender"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="28sp" />
+                    android:textSize="20sp" />
             </LinearLayout>
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:background="#66CCFF" />
+
             <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginTop="60dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
                 android:layout_weight="1">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="出生日期："
-                    android:textSize="28sp" />
+                    android:textColor="#C0C0C0"
+                    android:textSize="20sp" />
 
                 <TextView
-                    android:id="@+id/IBirth"
+                    android:id="@+id/CBirth"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="28sp" />
+                    android:textSize="20sp" />
             </LinearLayout>
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:background="#66CCFF" />
+
             <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginTop="60dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
                 android:layout_weight="1">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="身份证号："
-                    android:textSize="28sp" />
+                    android:textColor="#C0C0C0"
+                    android:textSize="20sp" />
 
                 <TextView
-                    android:id="@+id/INumber"
+                    android:id="@+id/CNumber"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="28sp" />
+                    android:textSize="20sp" />
             </LinearLayout>
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:background="#66CCFF" />
+
             <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginTop="60dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
                 android:layout_weight="1">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="地址："
-                    android:textSize="28sp" />
+                    android:textColor="#C0C0C0"
+                    android:textSize="20sp" />
 
                 <TextView
-                    android:id="@+id/IAddress"
+                    android:id="@+id/CAddress"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="28sp" />
+                    android:textSize="20sp" />
             </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="60dp"
-                android:layout_weight="1">
-
-                <Button
-                    android:id="@+id/Start"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="20sp"
-                    android:text="开始读取"
-                    android:textSize="28sp"
-                    android:onClick="onClick"/>
-            </LinearLayout>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:background="#66CCFF" />
 
         </LinearLayout>
 

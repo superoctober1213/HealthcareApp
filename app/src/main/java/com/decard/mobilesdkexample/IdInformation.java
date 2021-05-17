@@ -1,6 +1,7 @@
 package com.decard.mobilesdkexample;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -13,23 +14,21 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.decard.mobilesdkexample.LoginRegister.GetAccountInfoResponse;
+import com.decard.NDKMethod.BasicOper;
+import com.decard.mobilesdkexample.BaseClass.GetAccountInfoResponse;
+import com.decard.mobilesdkexample.HelpClass.CustomerHelp;
 import com.decard.mobilesdkexample.OperaUtils.IDCardUtil;
-import com.decard.mobilesdkexample.ReadHistory.AddSpaceTextWatcher;
-import com.decard.mobilesdkexample.ReadHistory.GetCustomerInfoRequest;
-import com.decard.mobilesdkexample.ReadHistory.GetCustomerInfoResponse;
+import com.decard.mobilesdkexample.BaseClass.AddSpaceTextWatcher;
+import com.decard.mobilesdkexample.BaseClass.GetCustomerInfoRequest;
+import com.decard.mobilesdkexample.BaseClass.GetCustomerInfoResponse;
 import com.google.gson.Gson;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.Buffer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
@@ -43,19 +42,19 @@ public class IdInformation extends AppCompatActivity implements View.OnClickList
     private TextView InfoBirth;
     private TextView InfoNum;
     private TextView InfoAdd;
-    private EditText editNum;
     private Button InStart;
+    private String phoneNum;
     private MessageHandler mHandler = new MessageHandler();
-    private static final int RESULT1 = 0;
-    //    private static final int RESULT2 = 1;
-    private String message;
-    private AddSpaceTextWatcher[] asEditTexts = new AddSpaceTextWatcher[1];
+    private static final int RESULT1 = 1;
+    private static final int RESULT2 = 2;
+    private static final int RESULT3 = 3;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_id_information);
+        BasicOper.dc_open("BT", this, "DC:0D:30:B9:7D:F7", 0);
 
         initView();
     }
@@ -67,10 +66,9 @@ public class IdInformation extends AppCompatActivity implements View.OnClickList
         InfoBirth = findViewById(R.id.IBirth);
         InfoNum = findViewById(R.id.INumber);
         InfoAdd = findViewById(R.id.IAddress);
-        editNum = findViewById(R.id.editNum);
-        asEditTexts[0] = new AddSpaceTextWatcher(editNum, 13);
-        asEditTexts[0].setSpaceType(AddSpaceTextWatcher.SpaceType.mobilePhoneNumberType);
 
+        Intent intent =getIntent();
+        phoneNum = intent.getStringExtra("phone");
 
         InStart.setOnClickListener(this);
     }
@@ -78,6 +76,7 @@ public class IdInformation extends AppCompatActivity implements View.OnClickList
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.Start:
+                BasicOper.dc_beep(10);
                 InfoName.setText(IDCardUtil.dc_get_i_d_raw_info().getName());
                 InfoGender.setText(IDCardUtil.dc_get_i_d_raw_info().getSex());
                 InfoBirth.setText(IDCardUtil.dc_get_i_d_raw_info().getBirthday());
@@ -106,9 +105,6 @@ public class IdInformation extends AppCompatActivity implements View.OnClickList
         StringBuilder birth = new StringBuilder(IDCardUtil.dc_get_i_d_raw_info().getBirthday());
         birth.insert(4, "-");
         birth.insert(7, "-");
-        StringBuilder telNum = new StringBuilder(editNum.getText().toString());
-        telNum.delete(3, 4);
-        telNum.delete(7, 8);
 
         StringBuilder nation = new StringBuilder(IDCardUtil.dc_get_i_d_raw_info().getNation());
         nation.delete(nation.length() - 1, nation.length());
@@ -128,7 +124,7 @@ public class IdInformation extends AppCompatActivity implements View.OnClickList
         getCustomerInfoRequest.setUpdatedOn(simpleDateFormat.format(date));
         getCustomerInfoRequest.setCreatedBy(currAccount.getAccountGuid());
         getCustomerInfoRequest.setUpdatedBy(currAccount.getAccountGuid());
-        getCustomerInfoRequest.setContactTel(telNum.toString());
+        getCustomerInfoRequest.setContactTel(phoneNum);
 
         new Thread() {
             public void run() {
@@ -177,15 +173,13 @@ public class IdInformation extends AppCompatActivity implements View.OnClickList
                     GetCustomerInfoResponse getCustomerInfoResponse = gson.fromJson(resultString,
                             GetCustomerInfoResponse.class);
 
-                    if (getCustomerInfoResponse.getResultCode().equals("0")){
-                        message = new String(getCustomerInfoResponse.getResultMessage().getBytes(), "GB2312");
+                    if (getCustomerInfoResponse.getResultCode().equals("0")) {
                         mHandler.sendEmptyMessage(RESULT1);
-                    }else {
-//                        mHandler.sendEmptyMessage(RESULT2);
-                        message = new String(getCustomerInfoResponse.getResultMessage().getBytes(), "GB2312");
-                        mHandler.sendEmptyMessage(RESULT1);
+                    } else if (getCustomerInfoResponse.getResultCode().equals("1")) {
+                        mHandler.sendEmptyMessage(RESULT2);
+                    } else {
+                        mHandler.sendEmptyMessage(RESULT3);
                     }
-//                    message = getCustomerInfoResponse.getResultMessage();
 
 
                 } catch (Exception e) {
@@ -219,7 +213,16 @@ public class IdInformation extends AppCompatActivity implements View.OnClickList
         public void handleMessage(@NonNull Message msg) {
             switch (msg.what) {
                 case RESULT1:
-                    Toast.makeText(IdInformation.this, message , Toast.LENGTH_SHORT).show();
+                    Toast.makeText(IdInformation.this, "上传成功", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(IdInformation.this, CustomerHelp.class);
+                    startActivity(intent);
+                    finish();
+                    break;
+                case RESULT2:
+                    Toast.makeText(IdInformation.this, "此身份已存在", Toast.LENGTH_SHORT).show();
+                    break;
+                case RESULT3:
+                    Toast.makeText(IdInformation.this, "上传失败", Toast.LENGTH_SHORT).show();
                     break;
             }
         }

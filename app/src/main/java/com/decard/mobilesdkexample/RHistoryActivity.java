@@ -1,4 +1,4 @@
-package com.decard.mobilesdkexample.ReadHistory;
+package com.decard.mobilesdkexample;
 
 import android.os.Bundle;
 
@@ -6,15 +6,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.decard.mobilesdkexample.R;
-
-import java.util.ArrayList;
-
-public class Activity1 extends AppCompatActivity {
+public class RHistoryActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
-    private DBReadHelper dbReadHelper;
-
 
 
     @Override
@@ -22,13 +16,11 @@ public class Activity1 extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_id_history);
         recyclerView = findViewById(R.id.rv);
-        dbReadHelper = new DBReadHelper(this);
-        ArrayList<IdInfo> data = dbReadHelper.getAllData();
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
-        HistoryAdapter historyAdapter = new HistoryAdapter(data);
-        recyclerView.setAdapter(historyAdapter);
+//        HistoryAdapter historyAdapter = new HistoryAdapter(data);
+//        recyclerView.setAdapter(historyAdapter);
 
     }
 }

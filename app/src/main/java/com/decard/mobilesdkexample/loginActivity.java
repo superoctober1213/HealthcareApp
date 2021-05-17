@@ -13,14 +13,14 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.decard.mobilesdkexample.LoginRegister.GetAccountInfoResponse;
-import com.decard.mobilesdkexample.LoginRegister.LoginRequest;
+import com.decard.mobilesdkexample.BaseClass.GetAccountInfoResponse;
+import com.decard.mobilesdkexample.BaseClass.LoginRequest;
+import com.decard.mobilesdkexample.HelpClass.CustomerHelp;
 import com.google.gson.Gson;
 
 import org.jetbrains.annotations.Nullable;
@@ -84,7 +84,6 @@ public class loginActivity extends AppCompatActivity implements View.OnClickList
 //        mTvLoginactivityRegister = findViewById(R.id.tv_loginactivity_register);
         mEtLoginactivityUsername = findViewById(R.id.et_loginactivity_username);
         mEtLoginactivityPassword = findViewById(R.id.et_loginactivity_password);
-        textView123 = findViewById(R.id.test123);
 
         // 设置点击事件监听器
         mBtLoginactivityLogin.setOnClickListener(this);
@@ -124,31 +123,7 @@ public class loginActivity extends AppCompatActivity implements View.OnClickList
                     mHandler.sendEmptyMessage(INPUT_IS_EMPTY);
                     return;
                 }
-//                connectIntenet(accountNo, password);
                 this.postParamsJson(accountNo, password);
-//                if (!TextUtils.isEmpty(name) && !TextUtils.isEmpty(password)) {
-//                    ArrayList<LoginRequest> data = mDBOpenHelper.getAllData();
-//                    boolean match = false;
-//                    for (int i = 0; i < data.size(); i++) {
-//                        LoginRequest user = data.get(i);
-//                        if (name.equals(user.getName()) && password.equals(user.getPassword())) {
-//                            match = true;
-//                            break;
-//                        } else {
-//                            match = false;
-//                        }
-//                    }
-//                    if (match) {
-//                        Toast.makeText(this, "登录成功", Toast.LENGTH_SHORT).show();
-//                        Intent intent = new Intent(this, Choose.class);
-//                        startActivity(intent);
-//                        finish();//销毁此Activity
-//                    } else {
-//                        Toast.makeText(this, "用户名或密码不正确，请重新输入", Toast.LENGTH_SHORT).show();
-//                    }
-//                } else {
-//                    Toast.makeText(this, "请输入你的用户名或密码", Toast.LENGTH_SHORT).show();
-//                }
                 break;
         }
     }
@@ -198,26 +173,13 @@ public class loginActivity extends AppCompatActivity implements View.OnClickList
                     while ((line = reader.readLine()) != null) {
                         response.append(line);
 
-//                        bos = new ByteArrayOutputStream();
-//                        byte[] buffer = new byte[10240];
-//                        int len = -1;
-//                        while ((len = inputStream.read(buffer)) != -1) {
-//                            bos.write(buffer, 0, len);
-//                        }
-//                        bos.flush();
-//                        byte[] resultByte = bos.toByteArray();
-//                        resultString = new String(resultByte);
                     }
 
-//                    GetAccountInfoResponse getAccountInfo = gson.fromJson(resultString,
-//                            GetAccountInfoResponse.class);
                     GetAccountInfoResponse getAccountInfo = gson.fromJson(response.toString(),
                             GetAccountInfoResponse.class);
 
                     if (getAccountInfo.getResultCode().equals("0")) {
-//                     if (getAccountInfo.getRecStatus() == null) {
-//                        mHandler.sendEmptyMessage(REQUST_ERROR3);
-//                    }
+
                         if (getAccountInfo.getRecStatus().equals("2")) {
                             //注销状态，判断是否为注销用户
                             //var retStatusMsg = string.Format("该登录用户（{0}）已注销！",
@@ -316,7 +278,7 @@ public class loginActivity extends AppCompatActivity implements View.OnClickList
                     break;
                 case REQUST_SUCCESS:
                     Toast.makeText(loginActivity.this, "登录成功", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(loginActivity.this, Choose.class);
+                    Intent intent = new Intent(loginActivity.this, CustomerHelp.class);
                     startActivity(intent);
                     finish();
                     break;

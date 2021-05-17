@@ -1,4 +1,4 @@
-package com.decard.mobilesdkexample.LoginRegister;
+package com.decard.mobilesdkexample.HelpClass;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -25,11 +25,11 @@ public class Code {
             'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
     };
 
-    private static com.decard.mobilesdkexample.LoginRegister.Code bmpCode;
+    private static com.decard.mobilesdkexample.HelpClass.Code bmpCode;
 
-    public static com.decard.mobilesdkexample.LoginRegister.Code getInstance() {
+    public static com.decard.mobilesdkexample.HelpClass.Code getInstance() {
         if(bmpCode == null)
-            bmpCode = new com.decard.mobilesdkexample.LoginRegister.Code();
+            bmpCode = new com.decard.mobilesdkexample.HelpClass.Code();
         return bmpCode;
     }
 

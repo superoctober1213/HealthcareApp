@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/app/src/main/java/com/decard/mobilesdkexample/BaseClass/AddSpaceTextWatcher.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/app/src/main/java/com/decard/mobilesdkexample/DatalistAdapter.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/app/src/main/java/com/decard/mobilesdkexample/IdInformation.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/app/src/main/java/com/decard/mobilesdkexample/LeDeviceListAdapter.java" charset="GBK" />
-    <file url="file://$PROJECT_DIR$/app/src/main/java/com/decard/mobilesdkexample/ReadHistory/AddSpaceTextWatcher.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/app/src/main/java/com/decard/mobilesdkexample/ReadHistory/GetPatientRecordRequest.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/app/src/main/java/com/decard/mobilesdkexample/ReadHistory/GetPatientRecordResponse.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/app/src/main/java/com/decard/mobilesdkexample/SPO2WaveView.java" charset="GBK" />
@@ -21,6 +22,6 @@
     <file url="file://$PROJECT_DIR$/app/src/main/res/layout/main_layout.xml" charset="GBK" />
     <file url="file://$PROJECT_DIR$/app/src/main/res/layout/wbp_sycn.xml" charset="GBK" />
     <file url="file://$PROJECT_DIR$/bluetoothlibrary/src/main/java/com/example/bluetoothlibrary/BluetoothLeClass.java" charset="GBK" />
-    <file url="PROJECT" charset="GB2312" />
+    <file url="PROJECT" charset="UTF-8" />
   </component>
 </project>
