@@ -133,7 +133,7 @@ public class IdInformation extends AppCompatActivity implements View.OnClickList
                 InputStream inputStream = null;
                 ByteArrayOutputStream bos = null;
                 try {
-                    String srcUrl = "https://www.zojoscreen.com/api/Values/InsertCustomerInfo/";
+                    String srcUrl = "https://www.zojoscreen.com/api/Values/EditCustomerInfo/";
                     URL url = new URL(srcUrl);
                     conn = (HttpURLConnection) url.openConnection();
                     conn.setReadTimeout(10000);

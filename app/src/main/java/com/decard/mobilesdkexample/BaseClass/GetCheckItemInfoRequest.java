@@ -39,7 +39,7 @@ public class GetCheckItemInfoRequest extends BaseRequest {
         HeartRate//心率值,
     }
 
-    public GetCheckItemInfoRequest(int ruid, String customerGuid, EnumCheckItem enumCheckItem,
+    public GetCheckItemInfoRequest(int ruid, String customerGuid, String enumCheckItem,
                                    String checkValue, String checkDate) {
         Ruid = ruid;
         CustomerGuid = customerGuid;
