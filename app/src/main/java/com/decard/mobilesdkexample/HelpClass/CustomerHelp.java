@@ -42,6 +42,7 @@ public class CustomerHelp extends AppCompatActivity implements View.OnClickListe
                 intent1.setClass(CustomerHelp.this,
                         com.decard.mobilesdkexample.loginActivity.class);
                 startActivity(intent1);
+                finish();
                 break;
 
 

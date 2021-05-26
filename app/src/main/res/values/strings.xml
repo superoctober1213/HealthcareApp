@@ -33,11 +33,10 @@
     <string name="temperatrue">温度</string>
     <string name="balancetemp">平衡温度</string>
     <string name="Fetaleart">胎心</string>
-    <string name="CuffPressure">袖带压</string>
-    <string name="Bloodxygenvalue">血压值</string>
-    <string name="heartrate">心率</string>
-    <string name="sys">收缩压</string>
-    <string name="dia">舒张压</string>
+    <string name="CuffPressure">袖带压:</string>
+    <string name="heartrate">心率:</string>
+    <string name="sys">收缩压:</string>
+    <string name="dia">舒张压:</string>
     <string name="changeuser">下发</string>
     <string name="setVoice">设置音量</string>
 </resources>

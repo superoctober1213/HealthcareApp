@@ -47,6 +47,8 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.decard.mobilesdkexample.BaseClass.GetCheckItemInfoRequest;
+import com.decard.mobilesdkexample.BaseClass.GetCheckItemInfoResponse;
 import com.example.bluetoothlibrary.BluetoothLeClass;
 import com.example.bluetoothlibrary.Config;
 import com.example.bluetoothlibrary.Impl.ResolveM70c;
@@ -62,16 +64,27 @@ import com.example.bluetoothlibrary.entity.Peripheral;
 import com.example.bluetoothlibrary.entity.SampleGattAttributes;
 import com.example.bluetoothlibrary.entity.SycnBp;
 import com.example.bluetoothlibrary.entity.SycnData;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Vector;
+import java.util.zip.GZIPInputStream;
 
 import static com.example.bluetoothlibrary.BluetoothLeClass.GetCharacteristicID;
 
@@ -80,7 +93,8 @@ import static com.example.bluetoothlibrary.BluetoothLeClass.GetCharacteristicID;
  * Activity for scanning and displaying available Bluetooth LE devices.
  */
 public class DeviceScanActivity extends Activity implements AdapterView.OnItemClickListener {
-    private final static String TAG = com.decard.mobilesdkexample.DeviceScanActivity.class.getSimpleName();
+    private final static String TAG =
+            com.decard.mobilesdkexample.DeviceScanActivity.class.getSimpleName();
     private final static String UUID_KEY_DATA = "0000ffe1-0000-1000-8000-00805f9b34fb";
     private final static String UUID_KEY_DATA_WF = "0000fff4-0000-1000-8000-00805f9b34fb";
     private final int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 0;
@@ -108,64 +122,70 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
     public static final int MACRO_CODE_14 = 14;
     public static final int MACRO_CODE_15 = 15;
     public static final int MACRO_CODE_16 = 16;
-    public static final int MACRO_CODE_17= 17;
-    public static final int MACRO_CODE_18= 18;
-    public static final int MACRO_CODE_19= 19;
-    public static final int MACRO_CODE_20= 20;
-    public static final int MACRO_CODE_21= 21;
-    public static final int MACRO_CODE_22= 22;
-    public static final int MACRO_CODE_23= 23;
+    public static final int MACRO_CODE_17 = 17;
+    public static final int MACRO_CODE_18 = 18;
+    public static final int MACRO_CODE_19 = 19;
+    public static final int MACRO_CODE_20 = 20;
+    public static final int MACRO_CODE_21 = 21;
+    public static final int MACRO_CODE_22 = 22;
+    public static final int MACRO_CODE_23 = 23;
     private final int REQUEST_ENABLE_BT = 0xa01;
     public static boolean isHasPermissions = false;
+    private MessageHandler mHandler = new MessageHandler();
+    private static final int SUCCESS = 1;
+    private static final int FAIL = 2;
+    MyApp myApp;
 
-    int currentapiVersion=android.os.Build.VERSION.SDK_INT;
+    int currentapiVersion = android.os.Build.VERSION.SDK_INT;
     private BluetoothLeClass mBLE;
-    private Config config=new Config();
+    private Config config = new Config();
     public static ArrayList<Peripheral> preipheralCopy = new ArrayList<Peripheral>();
 
     protected Handler handler;
-    public ListView listView,datalist;
-    private Button button,button_time,voiceSet,start_wbp,user_send;
-    private TextView temp_Blt, spo2, heart_rate, pi, resvalue,version_show,testtime,error,bettray,tatol,temp_blan,wf,voice_tx,blt_state,wbpmode,work_mode,user,softwarevervion;
-    private TextView sys,dia,hr,isguestmode,bp_mesure;
+    public ListView listView, datalist;
+    private Button button, button_time, voiceSet, start_wbp, user_send;
+    private TextView temp_Blt, spo2, heart_rate, pi, resvalue, version_show, testtime, error,
+            bettray, tatol, temp_blan, wf, voice_tx, blt_state, wbpmode, work_mode, user,
+            softwarevervion;
+    private TextView sys, dia, hr, isguestmode, bp_mesure;
     private LinearLayout wbp_linearlayout;
     public double temp;
-    public int spo2_s, heart_rate_s,resvalue_s,wbp,sys_int,dia_int,hr_int;
-   public  boolean guestmode;
+    public int spo2_s, heart_rate_s, resvalue_s, wbp, sys_int, dia_int, hr_int;
+    public boolean guestmode;
     public float pi_s;
     private LinearLayout oxi_linearlayout, temp_layout;
     private List<Byte> bytes = new ArrayList<Byte>();
-    public  LeDeviceListAdapter mLeDeviceListAdapter;
+    public LeDeviceListAdapter mLeDeviceListAdapter;
     public static int BTBattery = 4;
     //this is the data to draw spo2wave
     private Vector<Integer> SPO2WaveValues;
     private Vector<Integer> PIValues;
 
 
-
     private ConnectBleServiceInfo connectServiceInfo;
     private SPO2WaveView mSPO2WaveView;
     public int i = 0;
-    public int j=2;
-     public boolean openble=true;
+    public int j = 2;
+    public boolean openble = true;
     WbpDatalistAdapter wbpDatalistAdapter;
-    ResolveWt1 resolvewt1=new ResolveWt1();
-    ResolveM70c resolveM70c=new ResolveM70c();
-    ResolveWf100 resolveWf100=new ResolveWf100();
-    ResolveWt2 resolveWt2=new ResolveWt2();
-    ResolveWbp resolveWbp=new ResolveWbp();
-//
+    ResolveWt1 resolvewt1 = new ResolveWt1();
+    ResolveM70c resolveM70c = new ResolveM70c();
+    ResolveWf100 resolveWf100 = new ResolveWf100();
+    ResolveWt2 resolveWt2 = new ResolveWt2();
+    ResolveWbp resolveWbp = new ResolveWbp();
+
+    //
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_layout);
-        if (Integer.valueOf(android.os.Build.VERSION.SDK)>=23)
-        {
+        myApp = (MyApp) getApplication();
+        if (Integer.valueOf(android.os.Build.VERSION.SDK) >= 23) {
             getBLEPermissions();
         }
         initview();
         //set listenner
-        initListener();
+//        initListener();
 
         // Initializes a Bluetooth adapter.  For API level 18 and above, get a reference to
         // BluetoothAdapter through BluetoothManager.
@@ -178,9 +198,9 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
             Toast.makeText(this, R.string.error_bluetooth_not_supported, Toast.LENGTH_SHORT).show();
             finish();
             return;
-        } else  {
+        } else {
             if (!mBluetoothAdapter.isEnabled()) {
-                openble=false;
+                openble = false;
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 enableBtIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 this.startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
@@ -197,8 +217,7 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
             finish();
         }
 
-        if (mBluetoothAdapter.isEnabled())
-        {
+        if (mBluetoothAdapter.isEnabled()) {
             mBLE.scanLeDevice(true);//start to scan
 
         }
@@ -222,188 +241,180 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
     private void getBLEPermissions() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             isHasPermissions = false;
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION);
-            if(ActivityCompat.shouldShowRequestPermissionRationale(this,
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                    MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION);
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
                     Manifest.permission.READ_CONTACTS)) {
                 Toast.makeText(this, "shouldShowRequestPermissionRationale", Toast.LENGTH_SHORT).show();
             }
-        }else
-        {
-            isHasPermissions=true;
+        } else {
+            isHasPermissions = true;
         }
     }
+
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[]
-            grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[]
+                                                   grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (grantResults[0] == -1) {
             isHasPermissions = false;
-        }else {
+        } else {
             isHasPermissions = true;
         }
 
     }
 
 
-
     public void initview() {
-            SPO2WaveValues = new Vector<Integer>();
-            PIValues=new Vector<Integer>();
-            mSPO2WaveView = (SPO2WaveView) findViewById(R.id.SPO2Wave);
-            mSPO2WaveView.setValues(SPO2WaveValues);
-            mSPO2WaveView.setPIValues(PIValues);
-            mSPO2WaveView.setZOrderOnTop(true);    // necessary
-            SurfaceHolder sfhTrackHolder = mSPO2WaveView.getHolder();
-            sfhTrackHolder.setFormat(PixelFormat.TRANSPARENT);
-            button=$(R.id.sycn);
-            button_time=$(R.id.sycn_time);
-            version_show=$(R.id.version);
-            temp_blan=$(R.id.temp_blan);
-            testtime= $(R.id.time);
-            error= $(R.id.error);
-            bettray=$(R.id.bettray);
-            wf=$(R.id.wf);
-            voice_tx=$(R.id.voice);
-            voiceSet=$(R.id.set_voice);
-            blt_state=$(R.id.blt_state);
-            wbpmode=$(R.id.wbpmode);
-            work_mode=$(R.id.work_mode);
-            tatol=$(R.id.total);
-            //??????????
-            //????????
-            wbp_linearlayout=$(R.id.wbp);
-            sys= $(R.id.sys_id);
-            dia= $(R.id.dia_id);
-            hr= $(R.id.hr_id);
-            isguestmode= $(R.id.isguestmode_id);
-            bp_mesure=$(R.id.bp_mesure);
-            start_wbp=$(R.id.wbp_start);
-            user_send=$(R.id.user_send);
-            listView =$(R.id.devive_list);//this for device
-            datalist=$(R.id.datas);//this is for sync data from wbp
-            temp_Blt = $(R.id.temp);
-            oxi_linearlayout = $(R.id.oxi);
-            spo2 = $(R.id.spo2);
-            heart_rate = $(R.id.heart_rate);
-            pi = $(R.id.pi);
-            user=$(R.id.user);
-            resvalue = $(R.id.resvalue);
-            temp_layout = $(R.id.temp_layout);
-            softwarevervion=$(R.id.softwarevervion);
-            temp_Blt.setVisibility(View.INVISIBLE);
-            listView.setOnItemClickListener(this);
-            softwarevervion.setText(""+getAppVersionName(getApplicationContext()));
+
+        SPO2WaveValues = new Vector<Integer>();
+        PIValues = new Vector<Integer>();
+        mSPO2WaveView = (SPO2WaveView) findViewById(R.id.SPO2Wave);
+        mSPO2WaveView.setValues(SPO2WaveValues);
+        mSPO2WaveView.setPIValues(PIValues);
+        mSPO2WaveView.setZOrderOnTop(true);    // necessary
+        SurfaceHolder sfhTrackHolder = mSPO2WaveView.getHolder();
+        sfhTrackHolder.setFormat(PixelFormat.TRANSPARENT);
+//        button = $(R.id.sycn);
+//        button_time = $(R.id.sycn_time);
+//        version_show = $(R.id.version);
+//        temp_blan = $(R.id.temp_blan);
+        testtime = $(R.id.time);
+//        error = $(R.id.error);
+//        bettray = $(R.id.bettray);
+//        wf = $(R.id.wf);
+//        voice_tx = $(R.id.voice);
+//        voiceSet = $(R.id.set_voice);
+//        blt_state = $(R.id.blt_state);
+//        wbpmode = $(R.id.wbpmode);
+//        work_mode = $(R.id.work_mode);
+//        tatol = $(R.id.total);
+        //??????????
+        //????????
+        wbp_linearlayout = $(R.id.wbp);
+        sys = $(R.id.sys_id);
+        dia = $(R.id.dia_id);
+        hr = $(R.id.hr_id);
+//        isguestmode = $(R.id.isguestmode_id);
+        bp_mesure = $(R.id.bp_mesure);
+//        start_wbp = $(R.id.wbp_start);
+//        user_send = $(R.id.user_send);
+        listView = $(R.id.devive_list);//this for device
+        datalist = $(R.id.datas);//this is for sync data from wbp
+        temp_Blt = $(R.id.temp);
+        oxi_linearlayout = $(R.id.oxi);
+        spo2 = $(R.id.spo2);
+        heart_rate = $(R.id.heart_rate);
+        pi = $(R.id.pi);
+//        user = $(R.id.user);
+        resvalue = $(R.id.resvalue);
+        temp_layout = $(R.id.temp_layout);
+//        softwarevervion = $(R.id.softwarevervion);
+//        temp_Blt.setVisibility(View.INVISIBLE);
+        listView.setOnItemClickListener(this);
+//        softwarevervion.setText("" + getAppVersionName(getApplicationContext()));
 
     }
 
-  public void initListener() {
+    public void initListener() {
 
-      //this is to get data .
-      button.setOnClickListener(new View.OnClickListener() {
-          @Override
-          public void onClick(View v) {
-              //start to sync data
-              String connectingDevice=config.getConnectPreipheralOpsition().getBluetooth();
-              if (connectingDevice.equals(Constant.BLT_WBP)||connectingDevice.equals(Constant.AL_WBP))
-              {
-                  resolveWbp.SendForAll(mBLE);
-              }else {
+        //this is to get data .
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //start to sync data
+                String connectingDevice = config.getConnectPreipheralOpsition().getBluetooth();
+                if (connectingDevice.equals(Constant.BLT_WBP) || connectingDevice.equals(Constant.AL_WBP)) {
+                    resolveWbp.SendForAll(mBLE);
+                } else {
 
-                  resolvewt1.SendForAll(mBLE);
-              }
-          }
-      });
-      button_time.setOnClickListener(new View.OnClickListener() {
-          @Override
-          public void onClick(View v) {
-              //start to sync time
-              String connectingDevice=config.getConnectPreipheralOpsition().getBluetooth();
-              if (connectingDevice.equals(Constant.BLT_WBP)||connectingDevice.equals(Constant.AL_WBP))
-              {
-                  resolveWbp.getNowDateTime(mBLE);
-              }else if (connectingDevice.equals(Constant.BLT_WT2)){
+                    resolvewt1.SendForAll(mBLE);
+                }
+            }
+        });
+        button_time.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //start to sync time
+                String connectingDevice = config.getConnectPreipheralOpsition().getBluetooth();
+                if (connectingDevice.equals(Constant.BLT_WBP) || connectingDevice.equals(Constant.AL_WBP)) {
+                    resolveWbp.getNowDateTime(mBLE);
+                } else if (connectingDevice.equals(Constant.BLT_WT2)) {
 
-                  resolveWt2.SendForTime(mBLE);
-              }else
-              {
-                  resolvewt1.SendForTime(mBLE);
-              }
-          }
-      });
+                    resolveWt2.SendForTime(mBLE);
+                } else {
+                    resolvewt1.SendForTime(mBLE);
+                }
+            }
+        });
 
-      //Wf100 to set voice.
-      voiceSet.setOnClickListener(new View.OnClickListener() {
-          @Override
-          public void onClick(View v) {
-              Log.e("lllll", "onclick");
-              i++;
+        //Wf100 to set voice.
+        voiceSet.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.e("lllll", "onclick");
+                i++;
 
-              if (i == 6) {
-                  i = 0;
-                  i=0x00;
-              }
-              if (i==1)
-              {
-                  i=0x01;
-              }else if (i==2)
-              {
-                  i=0x02;
-              }else if (i==3)
-              {
-                  i=0x03;
-              }else if (i==4)
-              {
-                  i=0x04;
-              }else if(i==5){
+                if (i == 6) {
+                    i = 0;
+                    i = 0x00;
+                }
+                if (i == 1) {
+                    i = 0x01;
+                } else if (i == 2) {
+                    i = 0x02;
+                } else if (i == 3) {
+                    i = 0x03;
+                } else if (i == 4) {
+                    i = 0x04;
+                } else if (i == 5) {
 
-                  i=0x05;
-              }else
-              {
-                  i = 0;
-                  i=0x00;
-              }
-              Log.e("i","::"+i);
-              resolveWf100.SetVoice(mBLE, SampleGattAttributes.add(i));
-          }
-      });
-      if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-          Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
-          finish();
-      }
-      //  wbp start measure and stop measure;
-      start_wbp.setOnClickListener(new View.OnClickListener() {
-          @Override
-          public void onClick(View v) {
-              Log.e("....","start test");
-              if (j%2==0){
-                  resolveWbp.onSingleCommand(mBLE);
-              }else
-              {
-                  resolveWbp.onStopBleCommand(mBLE);
-              }
-              j++;
-          }
-      });
+                    i = 0x05;
+                } else {
+                    i = 0;
+                    i = 0x00;
+                }
+                Log.e("i", "::" + i);
+                resolveWf100.SetVoice(mBLE, SampleGattAttributes.add(i));
+            }
+        });
+        if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
+            Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
+            finish();
+        }
+        //  wbp start measure and stop measure;
+        start_wbp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.e("....", "start test");
+                if (j % 2 == 0) {
+                    resolveWbp.onSingleCommand(mBLE);
+                } else {
+                    resolveWbp.onStopBleCommand(mBLE);
+                }
+                j++;
+            }
+        });
 
-      // wbp to change user
-      user_send.setOnClickListener(new View.OnClickListener() {
-          @Override
-          public void onClick(View v) {
-              j++;
-              if (j%2==0)
-              {
-                  SettingUtil.userModeSelect=1;
-              }
-              else {
-                  SettingUtil.userModeSelect=2;
-              }
+        // wbp to change user
+        user_send.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                j++;
+                if (j % 2 == 0) {
+                    SettingUtil.userModeSelect = 1;
+                } else {
+                    SettingUtil.userModeSelect = 2;
+                }
 
 
-              resolveWbp.sendUserInfoToBle(mBLE);
-          }
-      });
+                resolveWbp.sendUserInfoToBle(mBLE);
+            }
+        });
 
-  }
+    }
 
 
     @SuppressLint("HandlerLeak")
@@ -429,8 +440,8 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
                     case MACRO_CODE_3://wt1 temp
                         listView.setVisibility(View.GONE);
                         temp_Blt.setVisibility(View.VISIBLE);
-                        temp =(Double) msg.obj;
-                        temp_Blt.setText("" +formatDouble4(temp));
+                        temp = (Double) msg.obj;
+                        temp_Blt.setText("" + formatDouble4(temp));
                         break;
                     case MACRO_CODE_4://temp state high
                         listView.setVisibility(View.GONE);
@@ -450,7 +461,7 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
                     case MACRO_CODE_7://wt2 balance temp
                         listView.setVisibility(View.GONE);
                         temp_Blt.setVisibility(View.VISIBLE);
-                        bettray.setText(""+msg.arg1);
+                        bettray.setText("" + msg.arg1);
                         temp = (Double) msg.obj;
                         temp_blan.setText("" + formatDouble4(temp));
                         break;
@@ -481,84 +492,81 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
                     case MACRO_CODE_12://Cuff pressure
                         listView.setVisibility(View.GONE);
 
-                                bp_mesure.setText(""+msg.arg1);
+                        bp_mesure.setText("" + msg.arg1);
 
                         break;
                     case MACRO_CODE_13://web the final result
                         listView.setVisibility(View.GONE);
-                                sys.setText(""+ msg.arg1);
-                                dia.setText(""+msg.arg2);
-                                hr.setText(""+msg.obj);
+                        sys.setText("" + msg.arg1);
+                        dia.setText("" + msg.arg2);
+                        hr.setText("" + msg.obj);
                         String str2 = msg.getData().getString("isguestmode");
-                                isguestmode.setText(""+str2);
+//                        isguestmode.setText("" + str2);
                         break;
-                    case MACRO_CODE_14://the state and version of the wbp
-                        listView.setVisibility(View.GONE);
-                        bettray.setText(""+msg.arg1);
-                        String str_version = msg.getData().getString("version");
-                        version_show.setText(str_version);
-                        String str_bleState = msg.getData().getString("bleState");
-                        Log.e("str_bleState",str_bleState);
-                        wbpmode.setText(str_bleState);
-                        String str_devState = msg.getData().getString("devState");
-                        Log.e("str_devState",str_devState);
-                        work_mode.setText(str_devState);
-                        break;
-                    case MACRO_CODE_15://error
-                        listView.setVisibility(View.GONE);
-                        error.setText(""+msg.obj);
+//                    case MACRO_CODE_14://the state and version of the wbp
+//                        listView.setVisibility(View.GONE);
+//                        bettray.setText("" + msg.arg1);
+//                        String str_version = msg.getData().getString("version");
+//                        version_show.setText(str_version);
+//                        String str_bleState = msg.getData().getString("bleState");
+//                        Log.e("str_bleState", str_bleState);
+//                        wbpmode.setText(str_bleState);
+//                        String str_devState = msg.getData().getString("devState");
+//                        Log.e("str_devState", str_devState);
+//                        work_mode.setText(str_devState);
+//                        break;
+//                    case MACRO_CODE_15://error
+//                        listView.setVisibility(View.GONE);
+//                        error.setText("" + msg.obj);
                     case MACRO_CODE_16://sync total datas
                         listView.setVisibility(View.GONE);
                         datalist.setAdapter(wbpDatalistAdapter);
-                        if (wbpDatalistAdapter!=null)
-                        {
+                        if (wbpDatalistAdapter != null) {
                             wbpDatalistAdapter.notifyDataSetChanged();
                         }
-                        tatol.setText(""+msg.arg1);
+//                        tatol.setText("" + msg.arg1);
                         break;
-                    case MACRO_CODE_17://softversion
-                        listView.setVisibility(View.GONE);
-                        Log.e("softversion",""+msg.obj);
-                        version_show.setText(""+msg.obj);
-                        break;
-                    case MACRO_CODE_18://BTtime
-                        listView.setVisibility(View.GONE);
-                        Log.e("time",""+msg.obj);
-                        testtime.setText(""+msg.obj);
-                        break;
-                    case MACRO_CODE_19://battery
-                        listView.setVisibility(View.GONE);
-                        Log.e("battery",""+msg.obj);
-                        bettray.setText(""+msg.obj);
-                        break;
+//                    case MACRO_CODE_17://softversion
+//                        listView.setVisibility(View.GONE);
+//                        Log.e("softversion", "" + msg.obj);
+//                        version_show.setText("" + msg.obj);
+//                        break;
+//                    case MACRO_CODE_18://BTtime
+//                        listView.setVisibility(View.GONE);
+//                        Log.e("time", "" + msg.obj);
+//                        testtime.setText("" + msg.obj);
+//                        break;
+//                    case MACRO_CODE_19://battery
+//                        listView.setVisibility(View.GONE);
+//                        Log.e("battery", "" + msg.obj);
+//                        bettray.setText("" + msg.obj);
+//                        break;
                     case MACRO_CODE_20://fetal wf100
                         listView.setVisibility(View.GONE);
-                        Log.e("fetal",""+msg.arg1);
-                        wf.setText(""+msg.arg1);
+                        Log.e("fetal", "" + msg.arg1);
+                        wf.setText("" + msg.arg1);
                         break;
                     case MACRO_CODE_21://voice wf100
                         listView.setVisibility(View.GONE);
-                        Log.e("voice",""+msg.obj);
-                        voice_tx.setText(""+msg.obj);
+                        Log.e("voice", "" + msg.obj);
+                        voice_tx.setText("" + msg.obj);
                         break;
-                    case MACRO_CODE_22://the state of wbp 0:spare 1:working
-                        listView.setVisibility(View.GONE);
-                        if (msg.arg1==0)
-                        {
-                            blt_state.setText("1");
-                        }else {
-                            blt_state.setText("0");
-                        }
-                        break;
-                    case MACRO_CODE_23://the user information/wbp
-                        listView.setVisibility(View.GONE);
-                        if (msg.arg1==1)
-                        {
-                            user.setText("user 1");
-                        }else {
-                            user.setText("user 2");
-                        }
-                        break;
+//                    case MACRO_CODE_22://the state of wbp 0:spare 1:working
+//                        listView.setVisibility(View.GONE);
+//                        if (msg.arg1 == 0) {
+//                            blt_state.setText("1");
+//                        } else {
+//                            blt_state.setText("0");
+//                        }
+//                        break;
+//                    case MACRO_CODE_23://the user information/wbp
+//                        listView.setVisibility(View.GONE);
+//                        if (msg.arg1 == 1) {
+//                            user.setText("user 1");
+//                        } else {
+//                            user.setText("user 2");
+//                        }
+//                        break;
                     default:
 
                         break;
@@ -572,11 +580,10 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
     @Override
     protected void onResume() {
         super.onResume();
-        if (!openble)
-        {
+        if (!openble) {
             mBLE.scanLeDevice(true);
         }
-        Log.e("see?",""+isActivityFront);
+        Log.e("see?", "" + isActivityFront);
         isActivityFront = true;
     }
 
@@ -596,8 +603,7 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
         super.onStop();
         mBLE.disconnect();
         mBLE.close();
-        if (mLeDeviceListAdapter!=null)
-        {
+        if (mLeDeviceListAdapter != null) {
 
             mLeDeviceListAdapter.clear();
         }
@@ -609,156 +615,158 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if (parent == listView) {
             final Peripheral device = mLeDeviceListAdapter.getDevice(position);
-            if (device == null)
-            {
+            if (device == null) {
                 return;
-            }
-            else
-            {
+            } else {
 
                 mBLE.setBLEService(device.getPreipheralMAC());
                 config.setConnectPreipheralOpsition(device);//set to be current device
-                Log.e(" the current device", "" + config.getConnectPreipheralOpsition().getPreipheralMAC() + "" + config.getConnectPreipheralOpsition().getBluetooth());
+                Log.e(" the current device",
+                        "" + config.getConnectPreipheralOpsition().getPreipheralMAC() + "" + config.getConnectPreipheralOpsition().getBluetooth());
                 Log.e("the version of the device", "" + device.getModel());
             }
 //            sendMsg(MACRO_CODE_3,handler,null);
         }
     }
+
     /**
      * ?????????????
-     *
      */
 
 
-    BluetoothLeClass.OnsetDevicePreipheral mOnSetDevicePreipheral=new BluetoothLeClass.OnsetDevicePreipheral() {
-        @Override
-        public void setDevicePreipheral(BluetoothDevice device, int model, String SN, float protocolVer) {
-            Peripheral preipheral = new Peripheral();
-            preipheral.setBluetooth(device.getName());
-            preipheral.setPreipheralMAC(device.getAddress());
-            switch (model) {
-                case 1:
-                    preipheral.setModel("WT1");
-                    break;
-                case 2:
-                    preipheral.setModel("WT2");
-                    break;
-                case 3:
-                    preipheral.setModel("WT3");
-                    break;
-                case 48:
-                    preipheral.setModel("M70C");
-                    break;
-                case 51:
-                    preipheral.setModel("WBP202");
-                    WBPMODE = 1;
-                    break;
-                case 57:
-                    preipheral.setModel("WBP204");
-                    WBPMODE = 1;
-                    break;
-                case 70:
-                    preipheral.setModel("WF100");
-                    break;
-                case 71:
-                    preipheral.setModel("WF200");
-                    break;
-                default:
-                    break;
-            }
-            //it is just for wbp
-            if (WBPMODE!=-1)
-            {
-                preipheral.setWebMode(WBPMODE);
-            }
-            preipheral.setPreipheralSN(SN);
-            preipheral.setName("Smart thermometer");
-            preipheral.setBrand("Wearcare");
-            preipheral.setManufacturer("blt");
-            preipheral.setIsActivation(0);
-            preipheral.setProtocolVer(protocolVer);
-            preipheral.setRemark("");
-            synchronized (preipheralCopy) {
-                if (preipheralCopy.size() == 0) {
-                    preipheralCopy.add(preipheral);
-                    mLeDeviceListAdapter=new LeDeviceListAdapter(com.decard.mobilesdkexample.DeviceScanActivity.this,preipheralCopy);
-                    sendMsg(com.decard.mobilesdkexample.DeviceScanActivity.MACRO_CODE_1,handler,null);
-                } else {
-                    boolean isTrue = false;//
-                    for (int i = 0; i < preipheralCopy.size(); i++) {
-                        Peripheral preipheral3 = preipheralCopy.get(i);
-                        if (preipheral3.getPreipheralSN().equals(SN)) {
-                            isTrue = true;//????
+    BluetoothLeClass.OnsetDevicePreipheral mOnSetDevicePreipheral =
+            new BluetoothLeClass.OnsetDevicePreipheral() {
+                @Override
+                public void setDevicePreipheral(BluetoothDevice device, int model, String SN,
+                                                float protocolVer) {
+                    Peripheral preipheral = new Peripheral();
+                    preipheral.setBluetooth(device.getName());
+                    preipheral.setPreipheralMAC(device.getAddress());
+                    switch (model) {
+                        case 1:
+                            preipheral.setModel("WT1");
+                            break;
+                        case 2:
+                            preipheral.setModel("WT2");
+                            break;
+                        case 3:
+                            preipheral.setModel("WT3");
+                            break;
+                        case 48:
+                            preipheral.setModel("M70C");
+                            break;
+                        case 51:
+                            preipheral.setModel("WBP202");
+                            WBPMODE = 1;
+                            break;
+                        case 57:
+                            preipheral.setModel("WBP204");
+                            WBPMODE = 1;
+                            break;
+                        case 70:
+                            preipheral.setModel("WF100");
+                            break;
+                        case 71:
+                            preipheral.setModel("WF200");
+                            break;
+                        default:
+                            break;
+                    }
+                    //it is just for wbp
+                    if (WBPMODE != -1) {
+                        preipheral.setWebMode(WBPMODE);
+                    }
+                    preipheral.setPreipheralSN(SN);
+                    preipheral.setName("Smart thermometer");
+                    preipheral.setBrand("Wearcare");
+                    preipheral.setManufacturer("blt");
+                    preipheral.setIsActivation(0);
+                    preipheral.setProtocolVer(protocolVer);
+                    preipheral.setRemark("");
+                    synchronized (preipheralCopy) {
+                        if (preipheralCopy.size() == 0) {
+                            preipheralCopy.add(preipheral);
+                            mLeDeviceListAdapter =
+                                    new LeDeviceListAdapter(com.decard.mobilesdkexample.DeviceScanActivity.this, preipheralCopy);
+                            sendMsg(com.decard.mobilesdkexample.DeviceScanActivity.MACRO_CODE_1,
+                                    handler,
+                                    null);
+                        } else {
+                            boolean isTrue = false;//
+                            for (int i = 0; i < preipheralCopy.size(); i++) {
+                                Peripheral preipheral3 = preipheralCopy.get(i);
+                                if (preipheral3.getPreipheralSN().equals(SN)) {
+                                    isTrue = true;//????
+                                }
+                            }
+                            //
+                            if (!isTrue) {
+                                preipheralCopy.add(preipheral);
+                                mLeDeviceListAdapter =
+                                        new LeDeviceListAdapter(com.decard.mobilesdkexample.DeviceScanActivity.this, preipheralCopy);
+
+                                sendMsg(com.decard.mobilesdkexample.DeviceScanActivity.MACRO_CODE_2,
+                                        handler, null);
+                            }
                         }
-                    }
-                    //
-                    if (!isTrue) {
-                        preipheralCopy.add(preipheral);
-                        mLeDeviceListAdapter=new LeDeviceListAdapter(com.decard.mobilesdkexample.DeviceScanActivity.this,preipheralCopy);
-
-                        sendMsg(com.decard.mobilesdkexample.DeviceScanActivity.MACRO_CODE_2,handler,null);
+                        Log.e("the connecting devie", preipheral.toString());
                     }
                 }
-                Log.e("the connecting devie", preipheral.toString());
-            }
-        }
-    };
+            };
 
 
-
-       BluetoothLeClass.OnConnectListener mOnConnectlistener=new BluetoothLeClass.OnConnectListener() {
-        @Override
-        public void onConnect(BluetoothGatt gatt) {
-
-
-            if (config.getConnectPreipheralOpsition().getModel().equals(Constant.M70C))
-            {
-                if (!mSPO2WaveView.getDrawing() && isActivityFront) {
-                    mSPO2WaveView.startDraw();
-                }
-
-                PIValues = new Vector<>();
-                mSPO2WaveView.setPIValues(PIValues);
-            }
+    BluetoothLeClass.OnConnectListener mOnConnectlistener =
+            new BluetoothLeClass.OnConnectListener() {
+                @Override
+                public void onConnect(BluetoothGatt gatt) {
 
 
-            Message msg = new Message();
-            msg.what = MACRO_CODE_22;
-            msg.arg1=0;
-            config.getMyFragmentHandler().sendMessage(msg);
+                    if (config.getConnectPreipheralOpsition().getModel().equals(Constant.M70C)) {
+                        if (!mSPO2WaveView.getDrawing() && isActivityFront) {
+                            mSPO2WaveView.startDraw();
+                        }
+
+                        PIValues = new Vector<>();
+                        mSPO2WaveView.setPIValues(PIValues);
+                    }
+
+
+                    Message msg = new Message();
+                    msg.what = MACRO_CODE_22;
+                    msg.arg1 = 0;
+                    config.getMyFragmentHandler().sendMessage(msg);
 
 //            isConnecting=true;
-        }
+                }
 
 
-    };
+            };
 
     /**
      * the bluetoth is disconnected
-     *
      */
-    BluetoothLeClass.OnDisconnectListener mOndisconnectListener=new BluetoothLeClass.OnDisconnectListener() {
-        @Override
-        public void onDisconnect(BluetoothGatt gatt) {
+    BluetoothLeClass.OnDisconnectListener mOndisconnectListener =
+            new BluetoothLeClass.OnDisconnectListener() {
+                @Override
+                public void onDisconnect(BluetoothGatt gatt) {
 //            blt_state.setText("????");
 
-            mSPO2WaveView.stopDraw();
+                    mSPO2WaveView.stopDraw();
 
-            Message msg = new Message();
-            msg.what = MACRO_CODE_22;
-            msg.arg1=1;
-            config.getMyFragmentHandler().sendMessage(msg);
+                    Message msg = new Message();
+                    msg.what = MACRO_CODE_22;
+                    msg.arg1 = 1;
+                    config.getMyFragmentHandler().sendMessage(msg);
 
 
-        }
-    };
-
+                }
+            };
 
 
     /**
      * ??????????Wt1????????????
      */
-    public ResolveWt1.OnWt1DataListener onWt1DataListener=new ResolveWt1.OnWt1DataListener() {
+    public ResolveWt1.OnWt1DataListener onWt1DataListener = new ResolveWt1.OnWt1DataListener() {
         @Override
         public void setTemp(Double temp) {
             Message msg = new Message();
@@ -767,16 +775,14 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
             handler.sendMessage(msg);
 
         }
+
         @Override
         public void ontempState(int stateCode) {
-            if (stateCode==4)
-            {
+            if (stateCode == 4) {
                 Message msg = new Message();
                 msg.what = MACRO_CODE_4;
                 config.getMyFragmentHandler().sendMessage(msg);//?????????
-            }
-            else
-            {
+            } else {
                 Message msg = new Message();
                 msg.what = MACRO_CODE_5;
                 config.getMyFragmentHandler().sendMessage(msg);//????????
@@ -789,7 +795,7 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
 
             Message msg = new Message();
             msg.what = MACRO_CODE_19;
-            msg.obj=bTBattery;
+            msg.obj = bTBattery;
             config.getMyFragmentHandler().sendMessage(msg);//
 
         }
@@ -798,7 +804,7 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
         public void onVersion(String version) {
             Message msg = new Message();
             msg.what = MACRO_CODE_17;
-            msg.obj=version;
+            msg.obj = version;
             config.getMyFragmentHandler().sendMessage(msg);//
 
         }
@@ -807,7 +813,7 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
         public void onTime(String time) {
             Message msg = new Message();
             msg.what = MACRO_CODE_18;
-            msg.obj=time;
+            msg.obj = time;
             config.getMyFragmentHandler().sendMessage(msg);//
 
         }
@@ -820,11 +826,13 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
         @Override
         public void onsycnResult(float BlueTem, String TempID) {
 
-            SycnData sycnData=new SycnData();
-            sycnData.setTemp(""+BlueTem);
+            SycnData sycnData = new SycnData();
+            sycnData.setTemp("" + BlueTem);
             sycnData.setTempID(TempID);
             sycnDatas.add(sycnData);
-            datalistAdapter=new DatalistAdapter(com.decard.mobilesdkexample.DeviceScanActivity.this,sycnDatas);
+            datalistAdapter =
+                    new DatalistAdapter(com.decard.mobilesdkexample.DeviceScanActivity.this,
+                            sycnDatas);
             datalist.setAdapter(datalistAdapter);
             datalistAdapter.notifyDataSetChanged();
 
@@ -833,23 +841,22 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
         @Override
         public void onSycnState(int begin, int total, String backtime) {
             testtime.setText(backtime);
-            tatol.setText("???"+begin+"???"+total+"???"+backtime);
+            tatol.setText("???" + begin + "???" + total + "???" + backtime);
 
         }
     };
 
 
-
     /**
      * ??????????Wt2????????????
      */
-    public ResolveWt2.OnWt2DataListener onWt2DataListener=new ResolveWt2.OnWt2DataListener() {
+    public ResolveWt2.OnWt2DataListener onWt2DataListener = new ResolveWt2.OnWt2DataListener() {
         @Override
         public void setUnbalanceTemp(Double unbalanceTemp) {
 
             Message msg = new Message();
             msg.what = MACRO_CODE_6;
-            msg.obj=unbalanceTemp;
+            msg.obj = unbalanceTemp;
             config.getMyFragmentHandler().sendMessage(msg);//??????????
 
         }
@@ -859,9 +866,9 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
 
             Message msg = new Message();
             msg.what = MACRO_CODE_7;
-            Log.e("bettery",""+btBattery);
-            msg.arg1=btBattery;
-            msg.obj=banlaceTemp;
+            Log.e("bettery", "" + btBattery);
+            msg.arg1 = btBattery;
+            msg.obj = banlaceTemp;
             config.getMyFragmentHandler().sendMessage(msg);//??????
 
         }
@@ -872,7 +879,7 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
             Message msg = new Message();
             msg.what = MACRO_CODE_17;
 
-            msg.obj=wt2ver;
+            msg.obj = wt2ver;
             config.getMyFragmentHandler().sendMessage(msg);
 
         }
@@ -881,7 +888,7 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
         public void onsycnResult(String time) {
             Message msg = new Message();
             msg.what = MACRO_CODE_18;
-            msg.obj=time;
+            msg.obj = time;
             config.getMyFragmentHandler().sendMessage(msg);
 
 
@@ -890,117 +897,380 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
     };
 
 
+    public ResolveM70c.OnM70cDataListener onM70cDataListener =
+            new ResolveM70c.OnM70cDataListener() {
+                @Override
+                public void setSPO2Value(int spo2Value) {
 
-    public ResolveM70c.OnM70cDataListener onM70cDataListener=new ResolveM70c.OnM70cDataListener() {
-        @Override
-        public void setSPO2Value(int spo2Value) {
+                    Message msg = new Message();
+                    msg.what = MACRO_CODE_8;
+                    msg.obj = spo2Value;
+                    handler.sendMessage(msg);
 
-            Message msg = new Message();
-            msg.what = MACRO_CODE_8;
-            msg.obj=spo2Value;
-            handler.sendMessage(msg);
+                }
 
-        }
+                @Override
+                public void setHeartRateValue(int heartRateValue) {
 
-        @Override
-        public void setHeartRateValue(int heartRateValue) {
+                    Message msg = new Message();
+                    msg.what = MACRO_CODE_9;
+                    msg.obj = heartRateValue;
+                    handler.sendMessage(msg);
 
-            Message msg = new Message();
-            msg.what = MACRO_CODE_9;
-            msg.obj=heartRateValue;
-            handler.sendMessage(msg);
+                }
 
-        }
+                @Override
+                public void setPI(Float pi) {
+                    Message msg = new Message();
+                    msg.what = MACRO_CODE_10;
+                    msg.obj = pi;
+                    handler.sendMessage(msg);
+                }
 
-        @Override
-        public void setPI(Float pi) {
-            Message msg = new Message();
-            msg.what = MACRO_CODE_10;
-            msg.obj=pi;
-            handler.sendMessage(msg);
-        }
+                @Override
+                public void setRespValue(int respValue) {
 
-        @Override
-        public void setRespValue(int respValue) {
+                    Message msg = new Message();
+                    msg.what = MACRO_CODE_11;
+                    msg.obj = respValue;
+                    handler.sendMessage(msg);
 
-            Message msg = new Message();
-            msg.what = MACRO_CODE_11;
-            msg.obj=respValue;
-            handler.sendMessage(msg);
+                }
 
-        }
+                @Override
+                public void setbattery(String battery) {
 
-        @Override
-        public void setbattery(String battery) {
+                    Log.e("battery::", "" + battery);
+                    Message msg = new Message();
+                    msg.what = MACRO_CODE_19;
+                    msg.obj = battery;
+                    config.getMyFragmentHandler().sendMessage(msg);
 
-            Log.e("battery::",""+battery);
-            Message msg = new Message();
-            msg.what = MACRO_CODE_19;
-            msg.obj=battery;
-            config.getMyFragmentHandler().sendMessage(msg);
+                }
 
-        }
+                @Override
+                public void setMain(String main) {
 
-        @Override
-        public void setMain(String main) {
+                    Log.e("mainversion::", "" + main);
+                    Message msg = new Message();
+                    msg.what = MACRO_CODE_17;
+                    msg.obj = main;
+                    config.getMyFragmentHandler().sendMessage(msg);
 
-            Log.e("mainversion::",""+main);
-            Message msg = new Message();
-            msg.what = MACRO_CODE_17;
-            msg.obj=main;
-            config.getMyFragmentHandler().sendMessage(msg);
+                }
 
-        }
+                @Override
+                public void setSub(String sub) {
 
-        @Override
-        public void setSub(String sub) {
+                    Log.e("SUbversion::", "" + sub);
+                }
 
-            Log.e("SUbversion::",""+sub);
-        }
+                @Override
+                public void setSPo2ValuesPIValues(Vector<Integer> sp02WaveValues,
+                                                  Vector<Integer> piValues) {
 
-        @Override
-        public void setSPo2ValuesPIValues(Vector<Integer> sp02WaveValues, Vector<Integer> piValues) {
-
-            mSPO2WaveView.setValues(sp02WaveValues);
-            mSPO2WaveView.setPIValues(piValues);
-
-
-
-        }
+                    mSPO2WaveView.setValues(sp02WaveValues);
+                    mSPO2WaveView.setPIValues(piValues);
 
 
-    };
+                }
 
 
+            };
 
-    public ResolveWbp.OnWBPDataListener onWBPDataListener=new ResolveWbp.OnWBPDataListener() {
+
+    public ResolveWbp.OnWBPDataListener onWBPDataListener = new ResolveWbp.OnWBPDataListener() {
         @SuppressLint("LongLogTag")
         @Override
         public void onMeasurementBp(int temp) {
             //?????????????
-            Log.e("temp........................",""+temp);
+            Log.e("temp........................", "" + temp);
             Message msg = new Message();
             msg.what = MACRO_CODE_12;
-            msg.arg1=temp;
+            msg.arg1 = temp;
             handler.sendMessage(msg);
         }
-        @Override
-        public void onMeasurementfin(final int SYS, final int DIA, final int PR, final Boolean isguestmode) {
-          //????????????????
 
-            Log.e("SYS...................",""+SYS);
-            Log.e("DIA...................",""+DIA);
-            Log.e("PR....................",""+PR);
-            Log.e("isguestmode..........",""+isguestmode);
+        @Override
+        public void onMeasurementfin(final int SYS, final int DIA, final int PR,
+                                     final Boolean isguestmode) {
+            //????????????????
+
+            Log.e("SYS...................", "" + SYS);
+            Log.e("DIA...................", "" + DIA);
+            Log.e("PR....................", "" + PR);
+            Log.e("isguestmode..........", "" + isguestmode);
             Message msg = new Message();
             msg.what = MACRO_CODE_13;
-            msg.arg1=SYS;
-            msg.arg2=DIA;
-            msg.obj=PR;
-            Bundle bundle=new Bundle();
-            bundle.putString("isguestmode",""+isguestmode);
+            msg.arg1 = SYS;
+            msg.arg2 = DIA;
+            msg.obj = PR;
+            Bundle bundle = new Bundle();
+            bundle.putString("isguestmode", "" + isguestmode);
             msg.setData(bundle);
             handler.sendMessage(msg);
+
+            String sDia = DIA + "";
+            String sSys= SYS + "";
+            String sPr = PR + "";
+            Log.e("测试舒张压", sDia);
+            if (DIA > 0) {
+
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                String date = simpleDateFormat.format(new Date());
+                GetCheckItemInfoRequest itemInfoRequest1 = new GetCheckItemInfoRequest(0,
+                        myApp.currCustomer.getCustomerGuid(), "DiastolicPressure", sDia, date);
+                GetCheckItemInfoRequest itemInfoRequest2 = new GetCheckItemInfoRequest(0,
+                        myApp.currCustomer.getCustomerGuid(), "SystolicPressure", sSys, date);
+                GetCheckItemInfoRequest itemInfoRequest3 = new GetCheckItemInfoRequest(0,
+                        myApp.currCustomer.getCustomerGuid(), " HeartRate", sPr, date);
+
+                new Thread() {
+                    public void run() {
+                        String resultString = null;
+                        HttpURLConnection conn = null;
+                        InputStream inputStream = null;
+                        ByteArrayOutputStream bos = null;
+                        try {
+                            String srcUrl = "https://www.zojoscreen" +
+                                    ".com/api/Values/EditCheckItemInfo/";
+                            URL url;
+                            url = new URL(srcUrl);
+                            conn = (HttpURLConnection) url.openConnection();
+                            conn.setReadTimeout(10000);
+                            conn.setConnectTimeout(10000);
+                            conn.setRequestMethod("POST");
+                            conn.setRequestProperty("Content-Type", "application/json");
+                            conn.setDoInput(true);
+                            conn.setDoOutput(true);
+                            conn.setUseCaches(false);
+                            conn.connect();
+                            Gson gson = new Gson();
+                            String paramsString1 = gson.toJson(itemInfoRequest1);
+
+
+                            //传入参数
+                            OutputStream outputStream = conn.getOutputStream();
+                            outputStream.write(paramsString1.getBytes());
+
+
+                            int responseCode;
+                            responseCode = conn.getResponseCode();
+                            if (responseCode == conn.HTTP_OK || true) {
+                                if (null != conn.getHeaderField("Content-Encoding")) {
+                                    inputStream = new GZIPInputStream(conn.getInputStream());
+                                } else {
+                                    inputStream = conn.getInputStream();
+
+                                }
+                            }
+                            BufferedReader reader =
+                                    new BufferedReader(new InputStreamReader(inputStream,
+                                            "GB2312"));
+                            StringBuilder response = new StringBuilder();
+                            String line;
+                            while ((line = reader.readLine()) != null) {
+                                response.append(line);
+                            }
+
+                            GetCheckItemInfoResponse getResponse =
+                                    gson.fromJson(response.toString(),
+                                            GetCheckItemInfoResponse.class);
+                            if (getResponse.getResultCode().equals("1")) {
+                                mHandler.sendEmptyMessage(FAIL);
+                            }
+                            if (getResponse.getResultCode().equals("0")) {
+                                mHandler.sendEmptyMessage(SUCCESS);
+                            }
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        } finally {
+                            if (conn != null) {
+                                conn.disconnect();
+                            }
+                            if (inputStream != null) {
+                                try {
+                                    inputStream.close();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            if (bos != null) {
+                                try {
+                                    bos.close();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    }
+                }.start();
+
+                new Thread() {
+                    public void run() {
+                        String resultString = null;
+                        HttpURLConnection conn = null;
+                        InputStream inputStream = null;
+                        ByteArrayOutputStream bos = null;
+                        try {
+                            String srcUrl = "https://www.zojoscreen" +
+                                    ".com/api/Values/EditCheckItemInfo/";
+                            URL url;
+                            url = new URL(srcUrl);
+                            conn = (HttpURLConnection) url.openConnection();
+                            conn.setReadTimeout(10000);
+                            conn.setConnectTimeout(10000);
+                            conn.setRequestMethod("POST");
+                            conn.setRequestProperty("Content-Type", "application/json");
+                            conn.setDoInput(true);
+                            conn.setDoOutput(true);
+                            conn.setUseCaches(false);
+                            conn.connect();
+                            Gson gson = new Gson();
+                            String paramsString1 = gson.toJson(itemInfoRequest2);
+
+
+                            //传入参数
+                            OutputStream outputStream = conn.getOutputStream();
+                            outputStream.write(paramsString1.getBytes());
+
+
+                            int responseCode;
+                            responseCode = conn.getResponseCode();
+                            if (responseCode == conn.HTTP_OK || true) {
+                                if (null != conn.getHeaderField("Content-Encoding")) {
+                                    inputStream = new GZIPInputStream(conn.getInputStream());
+                                } else {
+                                    inputStream = conn.getInputStream();
+
+                                }
+                            }
+                            BufferedReader reader =
+                                    new BufferedReader(new InputStreamReader(inputStream,
+                                            "GB2312"));
+                            StringBuilder response = new StringBuilder();
+                            String line;
+                            while ((line = reader.readLine()) != null) {
+                                response.append(line);
+                            }
+
+                            GetCheckItemInfoResponse getResponse =
+                                    gson.fromJson(response.toString(),
+                                            GetCheckItemInfoResponse.class);
+//                            if (getResponse.getResultCode().equals("1")) {
+//                                mHandler.sendEmptyMessage(FAIL);
+//                            }
+//                            if (getResponse.getResultCode().equals("0")) {
+//                                mHandler.sendEmptyMessage(SUCCESS);
+//                            }
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        } finally {
+                            if (conn != null) {
+                                conn.disconnect();
+                            }
+                            if (inputStream != null) {
+                                try {
+                                    inputStream.close();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            if (bos != null) {
+                                try {
+                                    bos.close();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    }
+                }.start();
+
+                new Thread() {
+                    public void run() {
+                        String resultString = null;
+                        HttpURLConnection conn = null;
+                        InputStream inputStream = null;
+                        ByteArrayOutputStream bos = null;
+                        try {
+                            String srcUrl = "https://www.zojoscreen" +
+                                    ".com/api/Values/EditCheckItemInfo/";
+                            URL url;
+                            url = new URL(srcUrl);
+                            conn = (HttpURLConnection) url.openConnection();
+                            conn.setReadTimeout(10000);
+                            conn.setConnectTimeout(10000);
+                            conn.setRequestMethod("POST");
+                            conn.setRequestProperty("Content-Type", "application/json");
+                            conn.setDoInput(true);
+                            conn.setDoOutput(true);
+                            conn.setUseCaches(false);
+                            conn.connect();
+                            Gson gson = new Gson();
+                            String paramsString1 = gson.toJson(itemInfoRequest3);
+
+
+                            //传入参数
+                            OutputStream outputStream = conn.getOutputStream();
+                            outputStream.write(paramsString1.getBytes());
+
+
+                            int responseCode;
+                            responseCode = conn.getResponseCode();
+                            if (responseCode == conn.HTTP_OK || true) {
+                                if (null != conn.getHeaderField("Content-Encoding")) {
+                                    inputStream = new GZIPInputStream(conn.getInputStream());
+                                } else {
+                                    inputStream = conn.getInputStream();
+
+                                }
+                            }
+                            BufferedReader reader =
+                                    new BufferedReader(new InputStreamReader(inputStream,
+                                            "GB2312"));
+                            StringBuilder response = new StringBuilder();
+                            String line;
+                            while ((line = reader.readLine()) != null) {
+                                response.append(line);
+                            }
+
+                            GetCheckItemInfoResponse getResponse =
+                                    gson.fromJson(response.toString(),
+                                            GetCheckItemInfoResponse.class);
+//                            if (getResponse.getResultCode().equals("1")) {
+//                                mHandler.sendEmptyMessage(FAIL);
+//                            }
+//                            if (getResponse.getResultCode().equals("0")) {
+//                                mHandler.sendEmptyMessage(SUCCESS);
+//                            }
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        } finally {
+                            if (conn != null) {
+                                conn.disconnect();
+                            }
+                            if (inputStream != null) {
+                                try {
+                                    inputStream.close();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            if (bos != null) {
+                                try {
+                                    bos.close();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    }
+                }.start();
+            }
         }
 
         /**
@@ -1010,11 +1280,11 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
         @Override
         public void onErroer(Object obj) {
             //???????????
-        Log.e("error",""+obj);
+            Log.e("error", "" + obj);
 
-            Message message=new Message();
+            Message message = new Message();
             message.what = MACRO_CODE_15;
-            message.obj=obj;
+            message.obj = obj;
             handler.sendMessage(message);
         }
 
@@ -1029,18 +1299,18 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
         public void onState(int btbattey, String bleState, String version, String devState) {
             //???????
 //            bettray.setText(""+btbattey);
-            Log.e("bleState.............",""+bleState);
-            Log.e("btbattey.............",""+btbattey);
+            Log.e("bleState.............", "" + bleState);
+            Log.e("btbattey.............", "" + btbattey);
 //            version_show.setText(""+version);
-            Log.e("devState.............",""+devState);
-            Log.e("version.............",""+version);
+            Log.e("devState.............", "" + devState);
+            Log.e("version.............", "" + version);
             Message msg = new Message();
             msg.what = MACRO_CODE_14;
-            msg.arg1=btbattey;
-            Bundle bundle=new Bundle();
-            bundle.putString("bleState",""+bleState);
-            bundle.putString("version",""+version);
-            bundle.putString("devState",""+devState);
+            msg.arg1 = btbattey;
+            Bundle bundle = new Bundle();
+            bundle.putString("bleState", "" + bleState);
+            bundle.putString("version", "" + version);
+            bundle.putString("devState", "" + devState);
 
             msg.setData(bundle);
             handler.sendMessage(msg);
@@ -1055,23 +1325,25 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
         @Override
         public void onSycnBp(ArrayList<SycnBp> sycnBps) {
 
-            for(SycnBp sycnBp:sycnBps)
-            {
-                Log.e("the sync data ","sys"+sycnBp.getSys()+"dia"+sycnBp.getDia()+"pr"+sycnBp.getHr()+"time"+sycnBp.getTime());
+            for (SycnBp sycnBp : sycnBps) {
+                Log.e("the sync data ",
+                        "sys" + sycnBp.getSys() + "dia" + sycnBp.getDia() + "pr" + sycnBp.getHr() + "time" + sycnBp.getTime());
             }
-           wbpDatalistAdapter=new WbpDatalistAdapter(com.decard.mobilesdkexample.DeviceScanActivity.this,sycnBps);
-            Message message=new Message();
-            message.arg1=sycnBps.size();
-            message.what=MACRO_CODE_16;
+            wbpDatalistAdapter =
+                    new WbpDatalistAdapter(com.decard.mobilesdkexample.DeviceScanActivity.this,
+                            sycnBps);
+            Message message = new Message();
+            message.arg1 = sycnBps.size();
+            message.what = MACRO_CODE_16;
             handler.sendMessage(message);
 
         }
 
         @Override
         public void onTime(String wbp_time) {
-            Message message=new Message();
-            message.obj=wbp_time;
-            message.what=MACRO_CODE_18;
+            Message message = new Message();
+            message.obj = wbp_time;
+            message.what = MACRO_CODE_18;
             handler.sendMessage(message);
 
         }
@@ -1082,203 +1354,224 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
          */
         @Override
         public void onUser(int user) {
-            Log.e("user::","......"+user);
-            Message message=new Message();
-            message.arg1=user;
-            message.what=MACRO_CODE_23;
+            Log.e("user::", "......" + user);
+            Message message = new Message();
+            message.arg1 = user;
+            message.what = MACRO_CODE_23;
             handler.sendMessage(message);
 
         }
     };
 
 
-   ResolveWf100.OnWF100DataListener onWf100DataListener=new ResolveWf100.OnWF100DataListener() {
+    ResolveWf100.OnWF100DataListener onWf100DataListener = new ResolveWf100.OnWF100DataListener() {
 
-       /**
-        * the received from device
-        * @param time
-        */
-       @Override
-       public void ontime(String time) {
-           Message message=new Message();
-           message.obj=time;
-           message.what=MACRO_CODE_18;
-           handler.sendMessage(message);
+        /**
+         * the received from device
+         * @param time
+         */
+        @Override
+        public void ontime(String time) {
+            Message message = new Message();
+            message.obj = time;
+            message.what = MACRO_CODE_18;
+            handler.sendMessage(message);
 
-       }
+        }
 
-       /**
-        *
-        * @param mainversion
-        * @param subversion
-        */
-       @Override
-       public void onverion(String mainversion, String subversion) {
-           Log.e("mainversion",""+mainversion);
-           Message msg = new Message();
-           msg.what = MACRO_CODE_17;
-           msg.obj=mainversion;
-           config.getMyFragmentHandler().sendMessage(msg);
+        /**
+         *
+         * @param mainversion
+         * @param subversion
+         */
+        @Override
+        public void onverion(String mainversion, String subversion) {
+            Log.e("mainversion", "" + mainversion);
+            Message msg = new Message();
+            msg.what = MACRO_CODE_17;
+            msg.obj = mainversion;
+            config.getMyFragmentHandler().sendMessage(msg);
 
-       }
+        }
 
-       /**
-        * the fetal value of wf100
-        * @param Fr1
-        */
-       @Override
-       public void onfr1(int Fr1) {
+        /**
+         * the fetal value of wf100
+         * @param Fr1
+         */
+        @Override
+        public void onfr1(int Fr1) {
 
 
-           Message msg = new Message();
-           msg.what = MACRO_CODE_20;
-           msg.arg1=Fr1;
-           config.getMyFragmentHandler().sendMessage(msg);
+            Message msg = new Message();
+            msg.what = MACRO_CODE_20;
+            msg.arg1 = Fr1;
+            config.getMyFragmentHandler().sendMessage(msg);
 
-       }
+        }
 
-       /**
-        *
-        * @param battery
-        */
-       @Override
-       public void onquantity(String battery) {
-           Log.e("Bettery",""+battery);
-           Message msg = new Message();
-           msg.what = MACRO_CODE_19;
-           msg.obj=battery;
-           config.getMyFragmentHandler().sendMessage(msg);
-       }
+        /**
+         *
+         * @param battery
+         */
+        @Override
+        public void onquantity(String battery) {
+            Log.e("Bettery", "" + battery);
+            Message msg = new Message();
+            msg.what = MACRO_CODE_19;
+            msg.obj = battery;
+            config.getMyFragmentHandler().sendMessage(msg);
+        }
 
-       /**
-        *
-        * @param voice the voice wf100
-        */
-       @Override
-       public void Onvoice(String voice) {
-           Message msg = new Message();
-           msg.what = MACRO_CODE_21;
-           msg.obj=voice;
-           config.getMyFragmentHandler().sendMessage(msg);
-       }
-   };
+        /**
+         *
+         * @param voice the voice wf100
+         */
+        @Override
+        public void Onvoice(String voice) {
+            Message msg = new Message();
+            msg.what = MACRO_CODE_21;
+            msg.obj = voice;
+            config.getMyFragmentHandler().sendMessage(msg);
+        }
+    };
     /**
      * when observe service then to diaplay the service.
-     * no matter what device you want to connect ,just matching the device you want to de connect.do not to change anything.
+     * no matter what device you want to connect ,just matching the device you want to de connect
+     * .do not to change anything.
      */
-    private BluetoothLeClass.OnServiceDiscoverListener mOnServiceDiscover = new BluetoothLeClass.OnServiceDiscoverListener() {
-        @Override
-        public void onServiceDiscover(BluetoothGatt gatt) {
-            Log.e("kkkkkkkkkkkkkkkkk", "found");
-            connectServiceInfo = new ConnectBleServiceInfo();
-            String connectingDevice=config.getConnectPreipheralOpsition().getBluetooth();
-            if (connectingDevice.equals(Constant.BLT_WBP)||connectingDevice.equals(Constant.AL_WBP)) {
-                connectServiceInfo.setDeviceName(connectingDevice);
-                connectServiceInfo.setServiceUUID(SampleGattAttributes.SeviceIDfbb0);
-                connectServiceInfo.setCharateUUID(SampleGattAttributes.GetCharacteristicIDfbb2);
-                connectServiceInfo.setCharateReadUUID(SampleGattAttributes.GetCharacteristicIDfbb1);
-                connectServiceInfo.setConectModel(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+    private BluetoothLeClass.OnServiceDiscoverListener mOnServiceDiscover =
+            new BluetoothLeClass.OnServiceDiscoverListener() {
+                @Override
+                public void onServiceDiscover(BluetoothGatt gatt) {
+                    Log.e("kkkkkkkkkkkkkkkkk", "found");
+                    connectServiceInfo = new ConnectBleServiceInfo();
+                    String connectingDevice = config.getConnectPreipheralOpsition().getBluetooth();
+                    if (connectingDevice.equals(Constant.BLT_WBP) || connectingDevice.equals(Constant.AL_WBP)) {
+                        connectServiceInfo.setDeviceName(connectingDevice);
+                        connectServiceInfo.setServiceUUID(SampleGattAttributes.SeviceIDfbb0);
+                        connectServiceInfo.setCharateUUID(SampleGattAttributes.GetCharacteristicIDfbb2);
+                        connectServiceInfo.setCharateReadUUID(SampleGattAttributes.GetCharacteristicIDfbb1);
+                        connectServiceInfo.setConectModel(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
 //            }else if (connectingDevice.equals(Constant.AL_WBP)) {
 //                connectServiceInfo.setDeviceName(connectingDevice);
 //                connectServiceInfo.setServiceUUID(SampleGattAttributes.SeviceIDfbb0_ALi);
-//                connectServiceInfo.setCharateUUID(SampleGattAttributes.GetCharacteristicIDfbb2_ALi);
-//                connectServiceInfo.setCharateReadUUID(SampleGattAttributes.GetCharacteristicIDfbb1);
-//                connectServiceInfo.setCharateALiRealTimeUUID(SampleGattAttributes.GetCharacteristicIDRealTime_ALi);
-//                connectServiceInfo.setCharateALiBatteryUUID(SampleGattAttributes.GetCharacteristicIDBattery_ALi);
-//                connectServiceInfo.setCharateALiHistoryDataUUID(SampleGattAttributes.GetCharacteristicIDHistoryData_ALi);
-//                connectServiceInfo.setConectModel(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE);
-            }
-            if (connectingDevice.equals(Constant.BLT_WBP)||connectingDevice.equals(Constant.AL_WBP)) {
-                //?????????????T??????
-                displayGattServices(mBLE.getSupportedGattServices(), connectServiceInfo);
+//                connectServiceInfo.setCharateUUID(SampleGattAttributes
+//                .GetCharacteristicIDfbb2_ALi);
+//                connectServiceInfo.setCharateReadUUID(SampleGattAttributes
+//                .GetCharacteristicIDfbb1);
+//                connectServiceInfo.setCharateALiRealTimeUUID(SampleGattAttributes
+//                .GetCharacteristicIDRealTime_ALi);
+//                connectServiceInfo.setCharateALiBatteryUUID(SampleGattAttributes
+//                .GetCharacteristicIDBattery_ALi);
+//                connectServiceInfo.setCharateALiHistoryDataUUID(SampleGattAttributes
+//                .GetCharacteristicIDHistoryData_ALi);
+//                connectServiceInfo.setConectModel(BluetoothGattDescriptor
+//                .ENABLE_INDICATION_VALUE);
+                    }
+                    if (connectingDevice.equals(Constant.BLT_WBP) || connectingDevice.equals(Constant.AL_WBP)) {
+                        //?????????????T??????
+                        displayGattServices(mBLE.getSupportedGattServices(), connectServiceInfo);
 //            }else if (connectingDevice.equals(Constant.AL_WBP)) {
 //                //????????????????
 //                displayGattServices_ali(mBLE.getSupportedGattServices());
-            }else if ((connectingDevice.equals(Constant.BLT_WF1))){
-                displayGattServices_WF(mBLE.getSupportedGattServices());
-            }else
-            {
-                displayGattServices(mBLE.getSupportedGattServices());
-            }
-        }
-    };
+                    } else if ((connectingDevice.equals(Constant.BLT_WF1))) {
+                        displayGattServices_WF(mBLE.getSupportedGattServices());
+                    } else {
+                        displayGattServices(mBLE.getSupportedGattServices());
+                    }
+                }
+            };
     /**
      *
      */
-    private BluetoothLeClass.OnDataAvailableListener mOnDataAvailable = new BluetoothLeClass.OnDataAvailableListener() {
-        /**
-         * all data comes from here
-         */
-        @Override
-        public void onCharacteristicRead(BluetoothGatt gatt,
-                                         BluetoothGattCharacteristic characteristic) {
+    private BluetoothLeClass.OnDataAvailableListener mOnDataAvailable =
+            new BluetoothLeClass.OnDataAvailableListener() {
+                /**
+                 * all data comes from here
+                 */
+                @Override
+                public void onCharacteristicRead(BluetoothGatt gatt,
+                                                 BluetoothGattCharacteristic characteristic) {
 
-            Log.e(TAG, "onCharRead " + gatt.getDevice().getName()
-                    + " read "
-                    + characteristic.getUuid().toString()
-                    + " -> "
-                    + Utils.bytesToHexString(characteristic.getValue()));
-            if (GetCharacteristicID.equals(characteristic.getUuid())) {
-                final byte[] datas = characteristic.getValue();
+                    Log.e(TAG, "onCharRead " + gatt.getDevice().getName()
+                            + " read "
+                            + characteristic.getUuid().toString()
+                            + " -> "
+                            + Utils.bytesToHexString(characteristic.getValue()));
+                    if (GetCharacteristicID.equals(characteristic.getUuid())) {
+                        final byte[] datas = characteristic.getValue();
 //                    Log.e("datas", "????????????" + "" + datas);
-                if (config.getConnectPreipheralOpsition().getModel().equals(Constant.WT2)) {
-                    resolveWt2.calculateData_WT2(datas,mBLE, com.decard.mobilesdkexample.DeviceScanActivity.this);//to  resolve the data from wt2
-                } else if (config.getConnectPreipheralOpsition().getModel().equals(Constant.M70C)) {
-                    final byte[] data = characteristic.getValue();
-                    if (data != null && data.length > 0) {
-                        final StringBuilder stringBuilder = new StringBuilder(
-                                data.length);
-                        for (byte byteChar : data)
-                            stringBuilder.append(String.format("%02X ", byteChar));
-                        String s = stringBuilder.toString();
-                        resolveM70c.calculateData_M70c(s);//resolve data from m70c
-                    }
-                } else
-                {
-                    resolvewt1.calculateData_WT1(datas,mBLE, com.decard.mobilesdkexample.DeviceScanActivity.this);//resolve data from wt1
-                }
-            } else {
-                final byte[] data= characteristic.getValue();
-                if (config.getConnectPreipheralOpsition().getBluetooth().equals(Constant.BLT_WBP)||config.getConnectPreipheralOpsition().getBluetooth().equals(Constant.AL_WBP)){
+                        if (config.getConnectPreipheralOpsition().getModel().equals(Constant.WT2)) {
+                            resolveWt2.calculateData_WT2(datas, mBLE,
+                                    com.decard.mobilesdkexample.DeviceScanActivity.this);//to
+                            // resolve
+                            // the data from wt2
+                        } else if (config.getConnectPreipheralOpsition().getModel().equals(Constant.M70C)) {
+                            final byte[] data = characteristic.getValue();
+                            if (data != null && data.length > 0) {
+                                final StringBuilder stringBuilder = new StringBuilder(
+                                        data.length);
+                                for (byte byteChar : data)
+                                    stringBuilder.append(String.format("%02X ", byteChar));
+                                String s = stringBuilder.toString();
+                                resolveM70c.calculateData_M70c(s);//resolve data from m70c
+                            }
+                        } else {
+                            resolvewt1.calculateData_WT1(datas, mBLE,
+                                    com.decard.mobilesdkexample.DeviceScanActivity.this);
+                            //resolve data
+                            // from wt1
+                        }
+                    } else {
+                        final byte[] data = characteristic.getValue();
+                        if (config.getConnectPreipheralOpsition().getBluetooth().equals(Constant.BLT_WBP) || config.getConnectPreipheralOpsition().getBluetooth().equals(Constant.AL_WBP)) {
 
-                   resolveWbp.resolveBPData2(data,mBLE, com.decard.mobilesdkexample.DeviceScanActivity.this);//resolve data from wep
-                }
-//                else if (config.getConnectPreipheralOpsition().getBluetooth().equals(Constant.AL_WBP))
+                            resolveWbp.resolveBPData2(data, mBLE,
+                                    com.decard.mobilesdkexample.DeviceScanActivity.this);
+                            //resolve data
+                            // from wep
+                        }
+//                else if (config.getConnectPreipheralOpsition().getBluetooth().equals(Constant
+//                .AL_WBP))
 //                {
-//                    resolveWbp.resolveALiBPData(data,getApplicationContext());//this is to resolve data from alibaba'device
+//                    resolveWbp.resolveALiBPData(data,getApplicationContext());//this is to
+//                    resolve data from alibaba'device
 //                }
-                else{
+                        else {
 
-                    if (data != null && data.length > 0) {
-                    final StringBuilder stringBuilder = new StringBuilder(
-                            data.length);
-                    for (byte byteChar : data)
-                        stringBuilder.append(String.format("%02X ", byteChar));
-                    String s =  stringBuilder.toString();
-                        s=s.replace(" ","");
-                    Log.e("s", "this is what" + "" + s);
-                       resolveWf100.resolveBPData_wf(s);// this is to resolve data from wf100
+                            if (data != null && data.length > 0) {
+                                final StringBuilder stringBuilder = new StringBuilder(
+                                        data.length);
+                                for (byte byteChar : data)
+                                    stringBuilder.append(String.format("%02X ", byteChar));
+                                String s = stringBuilder.toString();
+                                s = s.replace(" ", "");
+                                Log.e("s", "this is what" + "" + s);
+                                resolveWf100.resolveBPData_wf(s);// this is to resolve data from
+                                // wf100
+                            }
+                        }
                     }
                 }
-            }
-        }
-        /**
-         * get the callback from write
-         */
-        @Override
-        public void onCharacteristicWrite(BluetoothGatt gatt,
-                                          BluetoothGattCharacteristic characteristic) {
 
-            Log.e(TAG, "onCharWrite " + gatt.getDevice().getName()
-                    + " write "
-                    + characteristic.getUuid().toString()
-                    + " -> "
-                    + characteristic.getValue().toString());
-        }
-    };
+                /**
+                 * get the callback from write
+                 */
+                @Override
+                public void onCharacteristicWrite(BluetoothGatt gatt,
+                                                  BluetoothGattCharacteristic characteristic) {
+
+                    Log.e(TAG, "onCharWrite " + gatt.getDevice().getName()
+                            + " write "
+                            + characteristic.getUuid().toString()
+                            + " -> "
+                            + characteristic.getValue().toString());
+                }
+            };
 
     /**
      * to display the services of wf100,and to set notification
+     *
      * @param gattServices
      */
     @SuppressLint("LongLogTag")
@@ -1292,7 +1585,8 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
             Log.e(TAG, "-->service uuid:" + gattService.getUuid());
 
             //-----Characteristics????????-----//
-            List<BluetoothGattCharacteristic> gattCharacteristics = gattService.getCharacteristics();
+            List<BluetoothGattCharacteristic> gattCharacteristics =
+                    gattService.getCharacteristics();
             for (final BluetoothGattCharacteristic gattCharacteristic : gattCharacteristics) {
                 Log.e(TAG, "---->char uuid:" + gattCharacteristic.getUuid());
                 int permission = gattCharacteristic.getPermissions();
@@ -1304,7 +1598,8 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
 //                    Log.e(TAG, "---->char value:" + new String(data));
 //                }
                 //UUID_KEY_DATA????????????????????Characteristic
-                Log.e("0000fff4-0000-1000-8000-00805f9b34fb", "=" + gattCharacteristic.getUuid().toString());
+                Log.e("0000fff4-0000-1000-8000-00805f9b34fb",
+                        "=" + gattCharacteristic.getUuid().toString());
                 if (gattCharacteristic.getUuid().toString().equals(UUID_KEY_DATA_WF)) {
                     //????????????????????????
                     //?????????Characteristic?????????mOnDataAvailable.onCharacteristicRead()
@@ -1314,7 +1609,8 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
 //                                mBLE.readCharacteristic(gattCharacteristic);
 //                           }
 //                        }, 500);
-                    //????Characteristic????????,???????????????????mOnDataAvailable.onCharacteristicWrite()
+                    //????Characteristic????????,???????????????????mOnDataAvailable
+                    // .onCharacteristicWrite()
                     mBLE.setCharacteristicNotification(gattCharacteristic, true);
                     //????????????
                     gattCharacteristic.setValue("send data->");
@@ -1326,7 +1622,8 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
                 for (BluetoothGattDescriptor gattDescriptor : gattDescriptors) {
                     Log.e(TAG, "-------->desc uuid:" + gattDescriptor.getUuid());
                     int descPermission = gattDescriptor.getPermissions();
-                    Log.e(TAG, "-------->desc permission:" + Utils.getDescPermission(descPermission));
+                    Log.e(TAG,
+                            "-------->desc permission:" + Utils.getDescPermission(descPermission));
                     byte[] desData = gattDescriptor.getValue();
                     if (desData != null && desData.length > 0) {
                         Log.e(TAG, "-------->desc value:" + new String(desData));
@@ -1349,7 +1646,8 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
             Log.e(TAG, "-->service uuid:" + gattService.getUuid());
 
             //-----Characteristics-----//
-            List<BluetoothGattCharacteristic> gattCharacteristics = gattService.getCharacteristics();
+            List<BluetoothGattCharacteristic> gattCharacteristics =
+                    gattService.getCharacteristics();
             for (final BluetoothGattCharacteristic gattCharacteristic : gattCharacteristics) {
                 Log.e(TAG, "---->char uuid:" + gattCharacteristic.getUuid());
                 int permission = gattCharacteristic.getPermissions();
@@ -1361,7 +1659,8 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
                     Log.e(TAG, "---->char value:" + new String(data));
                 }
                 //UUID_KEY_DATA????????????????????Characteristic
-                Log.e("0000ffe4-0000-1000-8000-00805f9b34fb", "=" + gattCharacteristic.getUuid().toString());
+                Log.e("0000ffe4-0000-1000-8000-00805f9b34fb",
+                        "=" + gattCharacteristic.getUuid().toString());
                 if (gattCharacteristic.getUuid().toString().equals(UUID_KEY_DATA)) {
                     //????????????????????????
                     //?????????Characteristic?????????mOnDataAvailable.onCharacteristicRead()
@@ -1371,7 +1670,8 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
 //                                mBLE.readCharacteristic(gattCharacteristic);
 //                           }
 //                        }, 500);
-                    //????Characteristic????????,???????????????????mOnDataAvailable.onCharacteristicWrite()
+                    //????Characteristic????????,???????????????????mOnDataAvailable
+                    // .onCharacteristicWrite()
                     mBLE.setCharacteristicNotification(gattCharacteristic, true);
                     //????????????
                     gattCharacteristic.setValue("send data->");
@@ -1383,7 +1683,8 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
                 for (BluetoothGattDescriptor gattDescriptor : gattDescriptors) {
                     Log.e(TAG, "-------->desc uuid:" + gattDescriptor.getUuid());
                     int descPermission = gattDescriptor.getPermissions();
-                    Log.e(TAG, "-------->desc permission:" + Utils.getDescPermission(descPermission));
+                    Log.e(TAG,
+                            "-------->desc permission:" + Utils.getDescPermission(descPermission));
                     byte[] desData = gattDescriptor.getValue();
                     if (desData != null && desData.length > 0) {
                         Log.e(TAG, "-------->desc value:" + new String(desData));
@@ -1394,23 +1695,27 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
 
     }
 
-//  you can copy this to your project..if it is works.you will get some datas
+    //  you can copy this to your project..if it is works.you will get some datas
     @SuppressLint("LongLogTag")
-    private void displayGattServices(List<BluetoothGattService> gattServices, ConnectBleServiceInfo serviceInfo) {
+    private void displayGattServices(List<BluetoothGattService> gattServices,
+                                     ConnectBleServiceInfo serviceInfo) {
         if (gattServices == null)
             return;
         String uuid = null;
         Log.e("displayGattServices", serviceInfo.toString());
         for (BluetoothGattService gattService : gattServices) {
             uuid = gattService.getUuid().toString();
-            Log.e("uuid",""+gattService.getUuid().toString());
+            Log.e("uuid", "" + gattService.getUuid().toString());
             if (serviceInfo.getServiceUUID().equals(uuid)) {
-                List<BluetoothGattCharacteristic> gattCharacteristics = gattService.getCharacteristics();
+                List<BluetoothGattCharacteristic> gattCharacteristics =
+                        gattService.getCharacteristics();
                 for (final BluetoothGattCharacteristic gattCharacteristic : gattCharacteristics) {
                     uuid = gattCharacteristic.getUuid().toString();
-                    Log.e(" gattCharacteristic.getUuid().toString()",""+ gattCharacteristic.getUuid().toString());
+                    Log.e(" gattCharacteristic.getUuid().toString()",
+                            "" + gattCharacteristic.getUuid().toString());
                     if (uuid.equals(serviceInfo.getCharateReadUUID())) {
-                        Log.e("????GattCharacteUuid", uuid + ", CharacteSize: " + gattCharacteristics.size());
+                        Log.e("????GattCharacteUuid",
+                                uuid + ", CharacteSize: " + gattCharacteristics.size());
                         mBLE.setCharacteristicNotification(gattCharacteristic, true, serviceInfo);
                         mBLE.readCharacteristic(gattCharacteristic);
                         Log.e("--------1------", "11");
@@ -1418,7 +1723,8 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
                     }
                     if (uuid.equals(serviceInfo.getCharateUUID())) {
 
-                        Log.e("????GattCharacteUuid", uuid + ", CharacteSize: " + gattCharacteristics.size());
+                        Log.e("????GattCharacteUuid",
+                                uuid + ", CharacteSize: " + gattCharacteristics.size());
                         mBLE.setCharacteristicNotification(gattCharacteristic, true, serviceInfo);
                         return;
                     }
@@ -1429,16 +1735,18 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
 
     }
 
-//this is for alibaba'device
+    //this is for alibaba'device
     private void displayGattServices_ali(List<BluetoothGattService> gattServices) {
         if (gattServices == null)
             return;
         String uuid = null;
         for (BluetoothGattService gattService : gattServices) {
             uuid = gattService.getUuid().toString();
-            if (uuid.contains("1810") || uuid.contains("180f")) {//1810:????????????, ?????? 180f:??????
+            if (uuid.contains("1810") || uuid.contains("180f")) {//1810:????????????, ??????
+                // 180f:??????
                 Log.e(TAG, "displayGattServices: " + uuid);
-                List<BluetoothGattCharacteristic> gattCharacteristics = gattService.getCharacteristics();
+                List<BluetoothGattCharacteristic> gattCharacteristics =
+                        gattService.getCharacteristics();
                 for (BluetoothGattCharacteristic gattCharacteristic : gattCharacteristics) {
                     uuid = gattCharacteristic.getUuid().toString();
                     Log.e("console", "2gatt Characteristic: " + uuid);
@@ -1453,12 +1761,13 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
     public <T> T $(int id) {
         return (T) findViewById(id);
     }
+
     //send data
     public static void sendMsg(int flag, Handler handler, Object object) {
         Message msg = new Message();
         msg.what = flag;
         msg.obj = object;
-        if (handler!=null) {
+        if (handler != null) {
             handler.sendMessage(msg);
         }
     }
@@ -1485,6 +1794,20 @@ public class DeviceScanActivity extends Activity implements AdapterView.OnItemCl
 
 
         return df.format(d);
+    }
+
+    private class MessageHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case FAIL:
+                    Toast.makeText(DeviceScanActivity.this, "上传失败，请再次上传", Toast.LENGTH_SHORT).show();
+                    break;
+                case SUCCESS:
+                    Toast.makeText(DeviceScanActivity.this, "上传成功", Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        }
     }
 
 
